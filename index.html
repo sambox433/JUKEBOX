@@ -355,8 +355,9 @@
     </div>
 
     <script>
-        // SUBSTITUA ESTA URL PELA DO SEU WEB APP
-        const GAS_URL = 'https://script.google.com/macros/s/AKfycbzPnMtrh1OmSWfdLaw8GFSWCxUL5QnZM73MwWohZIBVXXoMpo_eEiN3Ut-FCa1VjqCesg/exec';
+    // URL base do seu Web App (sem query params)
+    // Exemplo de uso: ?rota=/consultar_cliente&nome=usuario&senha=senha
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxuBRlhNIPHSh4xDJB3-2uzPdjXgiCih_o2qSpWRe-PERRw8Z6a1SsziKfBUCJh0bTi-w/exec';
 
         let usuarioLogado = '';
         let senhaLogada = '';
@@ -394,14 +395,24 @@
             }
 
             try {
-                const url = `${GAS_URL}?nome=${encodeURIComponent(username)}&senha=${encodeURIComponent(password)}`;
+                // Monta a URL conforme o exemplo: ?rota=/consultar_cliente&nome=...&senha=...
+                const url = `${GAS_URL}?rota=/consultar_cliente&nome=${encodeURIComponent(username)}&senha=${encodeURIComponent(password)}`;
                 const response = await fetch(url);
-                const data = await response.json();
 
-                if (!response.ok || data.error) {
-                    throw new Error(data.error || 'Usuário ou senha inválidos');
+                // Exige status HTTP 200 antes de seguir
+                if (response.status !== 200) {
+                    const errText = await response.text().catch(() => response.statusText || 'Erro no servidor');
+                    throw new Error(errText || ('Usuário ou senha inválidos (status ' + response.status + ')'));
                 }
 
+                const data = await response.json();
+
+                // Se a API retornar um objeto de erro, trata a mensagem
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // Login bem-sucedido: guarda credenciais e mostra a UI
                 usuarioLogado = username;
                 senhaLogada = password;
 
@@ -410,10 +421,11 @@
                 sidebar.style.display = 'flex';
                 mainContent.style.display = 'flex';
                 searchSection.style.display = 'flex';
-                buscarVideos('sertanejo');
+                // inicia com pesquisa por pagodes conforme solicitado
+                buscarVideos('pagodes');
 
             } catch (err) {
-                loginError.textContent = err.message;
+                loginError.textContent = err.message || 'Erro no login.';
                 loginError.style.display = 'block';
             }
         });
@@ -492,7 +504,8 @@
             videosList.innerHTML = '<div style="color:#820ad1;font-weight:600;margin-top:24px;">Buscando...</div>';
 
             try {
-                const url = `${GAS_URL}?nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&q=${encodeURIComponent(q)}`;
+                // usa rota /buscar_videos e envia nome, senha e termo (q)
+                const url = `${GAS_URL}?rota=/buscar_videos&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&q=${encodeURIComponent(q)}`;
                 const response = await fetch(url);
                 const data = await response.json();
 
