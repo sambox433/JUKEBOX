@@ -88,7 +88,8 @@ body {
     width: 100%; padding: 14px 0; margin-top: 18px;
     border: none; border-radius: 10px;
     background: #fff; color: var(--nubank-purple);
-    font-size: 1.15rem; font-weight: 700;
+    font-size: 1.15rem;
+    font-weight: 700;
     cursor: pointer; box-shadow:0 2px 8px #820ad122;
     transition: 0.2s all;
 }
@@ -216,9 +217,11 @@ const searchBtn = document.getElementById('search-btn');
 const videosList = document.getElementById('videos-list');
 let html5QrCode = null;
 
-// Apps Script URL
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzGZEOZzukbwqmwMahndnV8OagscjxjSra1Ec_9M_TxZnz1xyD5VuE6RPptUDxjEQQMyA/exec";
+// Apps Script URLs
+const APPS_SCRIPT_LOGIN = "https://script.google.com/macros/s/AKfycbzGZEOZzukbwqmwMahndnV8OagscjxjSra1Ec_9M_TxZnz1xyD5VuE6RPptUDxjEQQMyA/exec";
+const APPS_SCRIPT_VIDEOS = "https://script.google.com/macros/s/AKfycbzGZEOZzukbwqmwMahndnV8OagscjxjSra1Ec_9M_TxZnz1xyD5VuE6RPptUDxjEQQMyA/exec";
 
+// Login
 loginForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     loginError.style.display = 'none';
@@ -226,8 +229,8 @@ loginForm.addEventListener('submit', async function(e) {
     const password = document.getElementById('password').value;
 
     try {
-        const url = `${APPS_SCRIPT_URL}?nome=${encodeURIComponent(username)}&senha=${encodeURIComponent(password)}`;
-        const response = await fetch(url, { method: 'GET', headers: { 'Accept':'application/json' } });
+        const url = `${APPS_SCRIPT_LOGIN}?nome=${encodeURIComponent(username)}&senha=${encodeURIComponent(password)}`;
+        const response = await fetch(url);
         if (!response.ok) throw new Error('Usuário ou senha inválidos');
         const data = await response.json();
 
@@ -239,6 +242,8 @@ loginForm.addEventListener('submit', async function(e) {
         sidebar.style.display = 'flex';
         mainContent.style.display = 'flex';
         searchSection.style.display = 'flex';
+
+        // Busca inicial de vídeos
         buscarVideos('sertanejo');
     } catch (err) {
         console.error(err);
@@ -250,7 +255,6 @@ function mostrarMenuLateral(data){
     userAvatar.textContent = (data.nome && data.nome.length>0)?data.nome[0].toUpperCase():'?';
     userName.textContent = data.nome||'Não informado';
     userId.textContent = 'ID: '+(data.usuario_id||'Não informado');
-
     saldoValor.textContent = data.creditos!==undefined?data.creditos:'0';
 
     sideMenu.innerHTML = '';
@@ -269,6 +273,7 @@ function mostrarMenuLateral(data){
     });
 }
 
+// QR Code
 scanBtn.addEventListener('click', function(){
     qrResult.style.display='none';
     qrResult.textContent='';
@@ -282,13 +287,14 @@ scanBtn.addEventListener('click', function(){
 });
 function pararLeitorQR(){ if(html5QrCode){ html5QrCode.stop().then(()=>{qrReader.style.display='none';}).catch(()=>{qrReader.style.display='none';}) }else qrReader.style.display='none'; }
 
+// Busca de vídeos
 searchBtn.addEventListener('click',()=>{ const termo=searchInput.value.trim(); buscarVideos(termo.length>0?termo:'sertanejo'); });
 searchInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); searchBtn.click(); } });
 
 async function buscarVideos(termo){
     videosList.innerHTML='<div class="loader"></div>'; // Loader animado
     try{
-        const url = `${APPS_SCRIPT_URL}?nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&acao=buscar_videos&q=${encodeURIComponent(termo)}`;
+        const url = `${APPS_SCRIPT_VIDEOS}?nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&acao=buscar_videos&q=${encodeURIComponent(termo)}`;
         const response = await fetch(url);
         if(!response.ok) throw new Error('Erro ao buscar vídeos');
         const videos = await response.json();
