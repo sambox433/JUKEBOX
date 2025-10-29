@@ -1,491 +1,309 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jukebox Online - Menu</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --nubank-purple: #820ad1;
-            --nubank-dark: #5f199b;
-            --nubank-light: #f6f5fa;
-            --nubank-gradient: linear-gradient(135deg, #820ad1 0%, #5f199b 100%);
-        }
-        body {
-            min-height: 100vh;
-            margin: 0;
-            font-family: 'Montserrat', Arial, sans-serif;
-            background: var(--nubank-gradient);
-            display: flex;
-            align-items: stretch;
-            justify-content: flex-start;
-        }
-        .sidebar {
-            width: 260px;
-            background: var(--nubank-gradient);
-            box-shadow: 2px 0 16px #0002;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 32px 16px 16px 16px;
-            min-height: 100vh;
-        }
-        .side-menu {
-            width: 100%;
-            margin-top: 40px;
-        }
-        .side-item {
-            background: #fff;
-            color: var(--nubank-purple);
-            border-radius: 10px;
-            box-shadow: 0 2px 8px #820ad122;
-            padding: 12px 14px;
-            margin-bottom: 14px;
-            font-size: 1.03rem;
-            display: flex;
-            flex-direction: column;
-        }
-        .side-item strong {
-            font-size: 1.06em;
-            margin-bottom: 2px;
-            color: #222;
-        }
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            padding: 48px 24px 24px 24px;
-            background: var(--nubank-light);
-            min-height: 100vh;
-        }
-        .user-info {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 36px;
-        }
-        .user-avatar {
-            width: 68px;
-            height: 68px;
-            border-radius: 50%;
-            background: var(--nubank-gradient);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.2rem;
-            color: #fff;
-            font-weight: 700;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 8px #820ad144;
-        }
-        .user-name {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #222;
-            margin-bottom: 4px;
-        }
-        .user-id {
-            font-size: 0.95rem;
-            color: #555;
-            opacity: 0.7;
-        }
-        .saldo-box {
-            background: var(--nubank-gradient);
-            border-radius: 16px;
-            box-shadow: 0 2px 8px #820ad144;
-            padding: 22px 18px 18px 18px;
-            margin-bottom: 28px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            width: 320px;
-            max-width: 90vw;
-        }
-        .saldo-label {
-            color: #fff;
-            font-size: 1.05rem;
-            font-weight: 500;
-            margin-bottom: 6px;
-            opacity: 0.9;
-        }
-        .saldo-valor {
-            color: #fff;
-            font-size: 2.1rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-shadow: 0 2px 8px #820ad144;
-        }
-        .scan-btn {
-            width: 100%;
-            margin-top: 18px;
-            padding: 14px 0;
-            border: none;
-            border-radius: 10px;
-            background: #fff;
-            color: var(--nubank-purple);
-            font-size: 1.15rem;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 2px 8px #820ad122;
-            transition: background 0.2s, color 0.2s;
-        }
-        .scan-btn:hover {
-            background: var(--nubank-purple);
-            color: #fff;
-        }
-        .qr-result {
-            width: 100%;
-            margin-top: 18px;
-            background: #f6f5fa;
-            color: #333;
-            border-radius: 10px;
-            padding: 14px 10px;
-            font-size: 1.08rem;
-            font-weight: 600;
-            box-shadow: 0 2px 8px #820ad122;
-            display: none;
-        }
-        /* Busca de músicas */
-        .search-section {
-            width: 100%;
-            max-width: 480px;
-            margin: 0 auto 32px auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-        }
-        .search-bar {
-            width: 100%;
-            display: flex;
-            gap: 8px;
-        }
-        .search-bar input {
-            flex: 1;
-            padding: 12px 10px;
-            border-radius: 8px;
-            border: 1.5px solid #e0e0e0;
-            font-size: 1.08rem;
-            background: #f6f5fa;
-            color: #222;
-            outline: none;
-            transition: border 0.2s;
-        }
-        .search-bar input:focus {
-            border: 1.5px solid var(--nubank-purple);
-        }
-        .search-btn {
-            padding: 12px 18px;
-            border-radius: 8px;
-            border: none;
-            background: var(--nubank-gradient);
-            color: #fff;
-            font-size: 1.08rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .search-btn:hover {
-            background: #5f199b;
-        }
-        .videos-list {
-            width: 100%;
-            max-width: 700px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 18px;
-            justify-content: center;
-        }
-        .video-card {
-            background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 2px 12px #820ad122;
-            padding: 14px 14px 10px 14px;
-            width: 210px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: box-shadow 0.2s, transform 0.2s;
-            cursor: pointer;
-        }
-        .video-card:hover {
-            box-shadow: 0 4px 24px #820ad144;
-            transform: translateY(-4px) scale(1.03);
-        }
-        .video-thumb {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            background: #eee;
-        }
-        .video-title {
-            font-size: 1.08rem;
-            font-weight: 700;
-            color: var(--nubank-dark);
-            margin-bottom: 4px;
-            text-align: center;
-        }
-        .video-id {
-            font-size: 0.93rem;
-            color: #888;
-            margin-bottom: 2px;
-        }
-        @media (max-width: 900px) {
-            .sidebar {
-                width: 100vw;
-                min-height: unset;
-                border-radius: 0;
-                box-shadow: none;
-                padding: 24px 8px;
-                flex-direction: row;
-                align-items: flex-start;
-            }
-            .main-content {
-                padding: 24px 8px;
-            }
-        }
-        @media (max-width: 600px) {
-            .main-content, .saldo-box {
-                width: 100vw;
-                max-width: 100vw;
-                padding: 12px 4px;
-            }
-            .login-container {
-                min-width: unset;
-                padding: 24px 8px;
-            }
-            .search-section {
-                max-width: 98vw;
-            }
-            .videos-list {
-                max-width: 98vw;
-            }
-        }
-    </style>
-    <script src="https://unpkg.com/html5-qrcode"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jukebox Online - Menu</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --nubank-purple: #820ad1;
+    --nubank-dark: #5f199b;
+    --nubank-light: #f6f5fa;
+    --nubank-gradient: linear-gradient(135deg, #820ad1 0%, #5f199b 100%);
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: 'Montserrat', Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    background: var(--nubank-gradient);
+    justify-content: flex-start;
+    align-items: stretch;
+}
+.sidebar {
+    width: 260px;
+    background: var(--nubank-gradient);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px;
+    min-height: 100vh;
+    box-shadow: 2px 0 16px #0002;
+}
+.side-menu { width: 100%; margin-top: 40px; }
+.side-item {
+    background: #fff;
+    color: var(--nubank-purple);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    font-size: 1.03rem;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 8px #820ad122;
+}
+.side-item strong { font-size: 1.06em; margin-bottom: 2px; color: #222; }
+
+.main-content {
+    flex: 1;
+    background: var(--nubank-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px 24px;
+    min-height: 100vh;
+}
+.user-info { display: flex; flex-direction: column; align-items: center; margin-bottom: 36px; }
+.user-avatar {
+    width: 68px; height: 68px;
+    border-radius: 50%;
+    background: var(--nubank-gradient);
+    color: #fff;
+    font-weight: 700;
+    font-size: 2.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px #820ad144;
+}
+.user-name { font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 4px; }
+.user-id { font-size: 0.95rem; color: #555; opacity: 0.7; }
+
+.saldo-box {
+    background: var(--nubank-gradient);
+    border-radius: 16px;
+    padding: 22px 18px 18px;
+    margin-bottom: 28px;
+    width: 320px; max-width: 90vw;
+    display: flex; flex-direction: column;
+    align-items: flex-start;
+    box-shadow: 0 2px 8px #820ad144;
+}
+.saldo-label { color: #fff; font-size: 1.05rem; font-weight: 500; margin-bottom: 6px; opacity: 0.9; }
+.saldo-valor { color: #fff; font-size: 2.1rem; font-weight: 700; letter-spacing:1px; text-shadow:0 2px 8px #820ad144; }
+.scan-btn {
+    width: 100%; padding: 14px 0; margin-top: 18px;
+    border: none; border-radius: 10px;
+    background: #fff; color: var(--nubank-purple);
+    font-size: 1.15rem; font-weight: 700;
+    cursor: pointer; box-shadow:0 2px 8px #820ad122;
+    transition: 0.2s all;
+}
+.scan-btn:hover { background: var(--nubank-purple); color: #fff; }
+
+.qr-result { width:100%; margin-top:18px; padding:14px 10px; border-radius:10px; display:none; font-weight:600; }
+
+.search-section { width:100%; max-width:480px; margin:0 auto 32px; display:flex; flex-direction:column; align-items:center; gap:12px; }
+.search-bar { width:100%; display:flex; gap:8px; }
+.search-bar input {
+    flex:1; padding:12px 10px; border-radius:8px; border:1.5px solid #e0e0e0; font-size:1.08rem;
+    outline:none; background:#f6f5fa; color:#222;
+}
+.search-bar input:focus { border:1.5px solid var(--nubank-purple); }
+.search-btn {
+    padding:12px 18px; border:none; border-radius:8px; background: var(--nubank-gradient);
+    color:#fff; font-weight:700; cursor:pointer; transition:0.2s all;
+}
+.search-btn:hover { background:#5f199b; }
+
+.videos-list { width:100%; max-width:700px; display:flex; flex-wrap:wrap; gap:18px; justify-content:center; }
+.video-card { width:210px; background:#fff; border-radius:16px; padding:14px; display:flex; flex-direction:column; align-items:center; cursor:pointer; transition:0.2s all; box-shadow:0 2px 12px #820ad122; }
+.video-card:hover { transform:translateY(-4px) scale(1.03); box-shadow:0 4px 24px #820ad144; }
+.video-thumb { width:100%; height:120px; object-fit:cover; border-radius:10px; margin-bottom:10px; }
+.video-title { font-weight:700; text-align:center; color:var(--nubank-dark); margin-bottom:4px; }
+.video-id { font-size:0.93rem; color:#888; margin-bottom:2px; }
+
+.login-container {
+    position:fixed; top:0; left:0; width:100vw; height:100vh; display:flex; align-items:center; justify-content:center;
+    background: linear-gradient(135deg, #5f199b 0%, #820ad1 100%);
+    flex-direction:column; color:#fff;
+}
+.login-container .app-title { font-size:2.3rem; font-weight:700; margin-bottom:20px; }
+.login-form { display:flex; flex-direction:column; gap:16px; background:#fff; padding:24px 28px; border-radius:16px; color:#222; min-width:320px; max-width:90vw; box-shadow:0 4px 20px #0004; }
+.login-form label { font-weight:700; margin-bottom:4px; }
+.login-form input { padding:12px 10px; border-radius:8px; border:1.5px solid #ccc; font-size:1rem; outline:none; }
+.login-form input:focus { border-color: var(--nubank-purple); }
+.login-btn {
+    padding:14px 0; border:none; border-radius:10px;
+    background: var(--nubank-gradient); color:#fff; font-weight:700; cursor:pointer; transition:0.2s all;
+}
+.login-btn:hover { background:#5f199b; }
+#login-error { color:#ff1744; font-weight:700; margin-top:12px; display:none; text-align:center; }
+
+@media(max-width:600px){ .login-form{min-width:unset; padding:20px 16px;} .sidebar{width:100vw;} .main-content{padding:24px 12px;} .search-section{max-width:98vw;} .videos-list{max-width:98vw;} }
+</style>
+<script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
-    <div class="sidebar" id="sidebar" style="display:none;">
-        <div class="side-menu" id="side-menu"></div>
+
+<div class="sidebar" id="sidebar" style="display:none;">
+    <div class="side-menu" id="side-menu"></div>
+</div>
+
+<div class="main-content" id="main-content" style="display:none;">
+    <div class="user-info">
+        <div class="user-avatar" id="user-avatar"></div>
+        <div class="user-name" id="user-name"></div>
+        <div class="user-id" id="user-id"></div>
     </div>
-    <div class="main-content" id="main-content" style="display:none;">
-        <div class="user-info">
-            <div class="user-avatar" id="user-avatar"></div>
-            <div class="user-name" id="user-name"></div>
-            <div class="user-id" id="user-id"></div>
-        </div>
-        <div class="saldo-box">
-            <div class="saldo-label">Saldo em Créditos</div>
-            <div class="saldo-valor" id="saldo-valor">0</div>
-            <button class="scan-btn" id="scan-btn">Escanear Ponto</button>
-            <div class="qr-result" id="qr-result"></div>
-            <div id="qr-reader" style="width:100%;margin-top:10px;display:none;"></div>
-        </div>
-        <!-- Busca de músicas -->
-        <div class="search-section" id="search-section" style="display:none;">
-            <div class="search-bar">
-                <input type="text" id="search-input" placeholder="Buscar músicas..." />
-                <button class="search-btn" id="search-btn">Buscar</button>
-            </div>
-        </div>
-        <div class="videos-list" id="videos-list"></div>
+    <div class="saldo-box">
+        <div class="saldo-label">Saldo em Créditos</div>
+        <div class="saldo-valor" id="saldo-valor">0</div>
+        <button class="scan-btn" id="scan-btn">Escanear Ponto</button>
+        <div class="qr-result" id="qr-result"></div>
+        <div id="qr-reader" style="width:100%;margin-top:10px;display:none;"></div>
     </div>
-
-    <div class="login-container" id="login-container">
-        <div class="app-title">Jukebox Online</div>
-        <form class="login-form" id="login-form">
-            <div>
-                <label for="username">Usuário</label>
-                <input type="text" id="username" name="username" placeholder="Digite seu usuário" required>
-            </div>
-            <div>
-                <label for="password">Senha</label>
-                <input type="password" id="password" name="password" placeholder="Digite sua senha" required>
-            </div>
-            <button class="login-btn" type="submit">Entrar</button>
-        </form>
-        <div id="login-error">Usuário ou senha inválidos.</div>
+    <div class="search-section" id="search-section" style="display:none;">
+        <div class="search-bar">
+            <input type="text" id="search-input" placeholder="Buscar músicas..." />
+            <button class="search-btn" id="search-btn">Buscar</button>
+        </div>
     </div>
+    <div class="videos-list" id="videos-list"></div>
+</div>
 
-    <script>
-        let usuarioLogado = '';
-        let senhaLogada = '';
+<div class="login-container" id="login-container">
+    <div class="app-title">Jukebox Online</div>
+    <form class="login-form" id="login-form">
+        <div>
+            <label for="username">Usuário</label>
+            <input type="text" id="username" name="username" placeholder="Digite seu usuário" required>
+        </div>
+        <div>
+            <label for="password">Senha</label>
+            <input type="password" id="password" name="password" placeholder="Digite sua senha" required>
+        </div>
+        <button class="login-btn" type="submit">Entrar</button>
+    </form>
+    <div id="login-error">Usuário ou senha inválidos.</div>
+</div>
 
-        const loginForm = document.getElementById('login-form');
-        const loginContainer = document.getElementById('login-container');
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('main-content');
-        const loginError = document.getElementById('login-error');
-        const userName = document.getElementById('user-name');
-        const userId = document.getElementById('user-id');
-        const userAvatar = document.getElementById('user-avatar');
-        const saldoValor = document.getElementById('saldo-valor');
-        const scanBtn = document.getElementById('scan-btn');
-        const qrResult = document.getElementById('qr-result');
-        const qrReader = document.getElementById('qr-reader');
-        const sideMenu = document.getElementById('side-menu');
-        const searchSection = document.getElementById('search-section');
-        const searchInput = document.getElementById('search-input');
-        const searchBtn = document.getElementById('search-btn');
-        const videosList = document.getElementById('videos-list');
+<script>
+let usuarioLogado = '';
+let senhaLogada = '';
 
-        let html5QrCode = null;
+const loginForm = document.getElementById('login-form');
+const loginContainer = document.getElementById('login-container');
+const sidebar = document.getElementById('sidebar');
+const mainContent = document.getElementById('main-content');
+const loginError = document.getElementById('login-error');
+const userName = document.getElementById('user-name');
+const userId = document.getElementById('user-id');
+const userAvatar = document.getElementById('user-avatar');
+const saldoValor = document.getElementById('saldo-valor');
+const scanBtn = document.getElementById('scan-btn');
+const qrResult = document.getElementById('qr-result');
+const qrReader = document.getElementById('qr-reader');
+const sideMenu = document.getElementById('side-menu');
+const searchSection = document.getElementById('search-section');
+const searchInput = document.getElementById('search-input');
+const searchBtn = document.getElementById('search-btn');
+const videosList = document.getElementById('videos-list');
+let html5QrCode = null;
 
-        loginForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            loginError.style.display = 'none';
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            try {
-                const response = await fetch(`http://167.114.85.72:8888/consultar_cliente?nome=${encodeURIComponent(username)}&senha=${encodeURIComponent(password)}`);
-                if (!response.ok) throw new Error('Usuário ou senha inválidos');
-                const data = await response.json();
-                usuarioLogado = username;
-                senhaLogada = password;
-                mostrarMenuLateral(data);
-                loginContainer.style.display = 'none';
-                sidebar.style.display = 'flex';
-                mainContent.style.display = 'flex';
-                searchSection.style.display = 'flex';
-                buscarVideos('sertanejo'); // busca inicial
-            } catch (err) {
-                loginError.style.display = 'block';
-            }
-        });
+// Substitua pela URL HTTPS do seu Apps Script
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqFww_x4hJbRu2m6a5J4WIJEvb6niLnBr8d-7E8bRO_o7jiet_09xx0YywPmoeuGvBOQ/exec";
 
-        function mostrarMenuLateral(data) {
-            userAvatar.textContent = (data.nome && data.nome.length > 0) ? data.nome[0].toUpperCase() : '?';
-            userName.textContent = data.nome || 'Não informado';
-            userId.textContent = 'ID: ' + (data.usuario_id || 'Não informado');
-            saldoValor.textContent = data.creditos !== undefined && data.creditos !== null ? data.creditos : '0';
+loginForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    loginError.style.display = 'none';
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
 
-            sideMenu.innerHTML = '';
-            const campos = [
-                { label: 'Telefone', valor: data.telefone },
-                { label: 'CPF', valor: data.cpf },
-                { label: 'Email', valor: data.email }
-            ];
-            campos.forEach(campo => {
-                const item = document.createElement('div');
-                item.className = 'side-item';
-                let valor = campo.valor;
-                if (valor === null || valor === undefined || valor === "") {
-                    valor = '<span style="opacity:0.7;font-style:italic;">Não informado</span>';
-                }
-                item.innerHTML = `<strong>${campo.label}:</strong> ${valor}`;
-                sideMenu.appendChild(item);
-            });
-        }
+    try {
+        const url = `${APPS_SCRIPT_URL}?nome=${encodeURIComponent(username)}&senha=${encodeURIComponent(password)}`;
+        const response = await fetch(url, { method: 'GET', headers: { 'Accept':'application/json' } });
+        if (!response.ok) throw new Error('Usuário ou senha inválidos');
+        const data = await response.json();
 
-        scanBtn.addEventListener('click', function() {
-            qrResult.style.display = 'none';
-            qrResult.textContent = '';
-            if (qrReader.style.display === 'block') {
-                pararLeitorQR();
-                return;
-            }
-            qrReader.style.display = 'block';
-            if (!html5QrCode) {
-                html5QrCode = new Html5Qrcode("qr-reader");
-            }
-            html5QrCode.start(
-                { facingMode: "environment" },
-                {
-                    fps: 10,
-                    qrbox: 220
-                },
-                qrCodeMessage => {
-                    qrResult.style.display = 'block';
-                    qrResult.textContent = 'Valor escaneado: ' + qrCodeMessage;
-                    pararLeitorQR();
-                },
-                errorMessage => {
-                    // Ignora erros de leitura
-                }
-            ).catch(err => {
-                qrResult.style.display = 'block';
-                qrResult.textContent = 'Erro ao acessar a câmera: ' + err;
-                pararLeitorQR();
-            });
-        });
+        usuarioLogado = username;
+        senhaLogada = password;
 
-        function pararLeitorQR() {
-            if (html5QrCode) {
-                html5QrCode.stop().then(() => {
-                    qrReader.style.display = 'none';
-                }).catch(() => {
-                    qrReader.style.display = 'none';
-                });
-            } else {
-                qrReader.style.display = 'none';
-            }
-        }
+        mostrarMenuLateral(data);
+        loginContainer.style.display = 'none';
+        sidebar.style.display = 'flex';
+        mainContent.style.display = 'flex';
+        searchSection.style.display = 'flex';
+        buscarVideos('sertanejo');
+    } catch (err) {
+        console.error(err);
+        loginError.style.display = 'block';
+    }
+});
 
-        // Busca de músicas
-        searchBtn.addEventListener('click', function() {
-            const termo = searchInput.value.trim();
-            buscarVideos(termo.length > 0 ? termo : 'sertanejo');
-        });
+function mostrarMenuLateral(data){
+    userAvatar.textContent = (data.nome && data.nome.length>0)?data.nome[0].toUpperCase():'?';
+    userName.textContent = data.nome||'Não informado';
+    userId.textContent = 'ID: '+(data.usuario_id||'Não informado');
+    saldoValor.textContent = data.creditos!==undefined?data.creditos:'0';
 
-        searchInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                searchBtn.click();
-            }
-        });
+    sideMenu.innerHTML = '';
+    const campos = [
+        {label:'Telefone', valor:data.telefone},
+        {label:'CPF', valor:data.cpf},
+        {label:'Email', valor:data.email}
+    ];
+    campos.forEach(c=>{
+        const item = document.createElement('div');
+        item.className='side-item';
+        let valor=c.valor; 
+        if(!valor) valor='<span style="opacity:0.7;font-style:italic;">Não informado</span>';
+        item.innerHTML=`<strong>${c.label}:</strong> ${valor}`;
+        sideMenu.appendChild(item);
+    });
+}
 
-        async function buscarVideos(termo) {
-            videosList.innerHTML = '<div style="color:#820ad1;font-weight:600;margin-top:24px;">Buscando músicas...</div>';
-            try {
-                const url = `http://167.114.85.72:8888/buscar_videos?nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&q=${encodeURIComponent(termo)}`;
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Erro ao buscar vídeos');
-                const videos = await response.json();
-                renderizarVideos(videos);
-            } catch (err) {
-                videosList.innerHTML = '<div style="color:#ff1744;font-weight:600;margin-top:24px;">Erro ao buscar músicas.</div>';
-            }
-        }
+scanBtn.addEventListener('click', function(){
+    qrResult.style.display='none';
+    qrResult.textContent='';
+    if(qrReader.style.display==='block'){ pararLeitorQR(); return; }
+    qrReader.style.display='block';
+    if(!html5QrCode) html5QrCode=new Html5Qrcode("qr-reader");
+    html5QrCode.start({facingMode:"environment"}, {fps:10, qrbox:220},
+        qrCodeMessage=>{ qrResult.style.display='block'; qrResult.textContent='Valor escaneado: '+qrCodeMessage; pararLeitorQR(); },
+        errorMessage=>{}
+    ).catch(err=>{ qrResult.style.display='block'; qrResult.textContent='Erro ao acessar a câmera: '+err; pararLeitorQR(); });
+});
+function pararLeitorQR(){ if(html5QrCode){ html5QrCode.stop().then(()=>{qrReader.style.display='none';}).catch(()=>{qrReader.style.display='none';}) }else qrReader.style.display='none'; }
 
-        function renderizarVideos(videos) {
-            // Se vier um objeto com "results", use ele
-            if (videos && Array.isArray(videos.results)) {
-                videos = videos.results;
-            }
-            if (!Array.isArray(videos) || videos.length === 0) {
-                videosList.innerHTML = '<div style="color:#888;font-weight:600;margin-top:24px;">Nenhuma música encontrada.</div>';
-                return;
-            }
-            videosList.innerHTML = '';
-            videos.forEach(video => {
-                const card = document.createElement('div');
-                card.className = 'video-card';
-                card.innerHTML = `
-                    <img class="video-thumb" src="${video.thumbnail || video.imagem || 'https://via.placeholder.com/210x120?text=Sem+Imagem'}" alt="Thumb">
-                    <div class="video-title">${video.title || video.titulo || 'Sem título'}</div>
-                    <div class="video-id">ID: ${video.id || '-'}</div>
-                    <div class="video-id" style="font-size:0.95em;color:#5f199b;">${video.author ? 'Cantor: ' + video.author : ''}</div>
-                `;
-                card.addEventListener('click', () => {
-                    if (confirm(`Deseja enviar o vídeo "${video.title || video.titulo}" para a máquina?`)) {
-                        enviarVideoParaMaquina(video.id);
-                    }
-                });
-                videosList.appendChild(card);
-            });
-        }
+searchBtn.addEventListener('click',()=>{ const termo=searchInput.value.trim(); buscarVideos(termo.length>0?termo:'sertanejo'); });
+searchInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); searchBtn.click(); } });
 
-        function enviarVideoParaMaquina(videoId) {
-            // Aqui você pode implementar a chamada para enviar o vídeo para a máquina
-            alert('Vídeo enviado para a máquina! (ID: ' + videoId + ')');
-            // Exemplo de requisição:
-            // fetch(`URL_DA_API/envia_video?nome=${usuarioLogado}&senha=${senhaLogada}&video_id=${videoId}`)
-        }
-    </script>
+async function buscarVideos(termo){
+    videosList.innerHTML='<div style="color:#820ad1;font-weight:600;margin-top:24px;">Buscando músicas...</div>';
+    try{
+        const url = `${APPS_SCRIPT_URL}?nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&acao=buscar_videos&q=${encodeURIComponent(termo)}`;
+        const response = await fetch(url);
+        if(!response.ok) throw new Error('Erro ao buscar vídeos');
+        const videos = await response.json();
+        renderizarVideos(videos);
+    }catch(err){
+        videosList.innerHTML='<div style="color:#ff1744;font-weight:600;margin-top:24px;">Erro ao buscar músicas.</div>';
+    }
+}
+
+function renderizarVideos(videos){
+    if(videos && Array.isArray(videos.results)) videos=videos.results;
+    if(!Array.isArray(videos)||videos.length===0){ videosList.innerHTML='<div style="color:#888;font-weight:600;margin-top:24px;">Nenhuma música encontrada.</div>'; return; }
+    videosList.innerHTML='';
+    videos.forEach(video=>{
+        const card=document.createElement('div');
+        card.className='video-card';
+        card.innerHTML=`
+            <img class="video-thumb" src="${video.thumbnail||video.imagem||'https://via.placeholder.com/210x120?text=Sem+Imagem'}" alt="Thumb">
+            <div class="video-title">${video.title||video.titulo||'Sem título'}</div>
+            <div class="video-id">ID: ${video.id||'-'}</div>
+            <div class="video-id" style="font-size:0.95em;color:#5f199b;">${video.author?'Cantor: '+video.author:''}</div>
+        `;
+        card.addEventListener('click', ()=>{ if(confirm(`Deseja enviar o vídeo "${video.title||video.titulo}" para a máquina?`)){ enviarVideoParaMaquina(video.id); }});
+        videosList.appendChild(card);
+    });
+}
+
+function enviarVideoParaMaquina(videoId){ alert('Vídeo enviado para a máquina! (ID: '+videoId+')'); }
+</script>
 </body>
 </html>
