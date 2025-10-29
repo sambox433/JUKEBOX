@@ -306,6 +306,19 @@
             .login-container { padding: 24px 8px; }
             .search-section, .videos-list { max-width: 98vw; }
         }
+        /* Spinner usado ao atualizar saldo */
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255,255,255,0.35);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
     <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
@@ -324,8 +337,30 @@
         <div class="saldo-box">
             <div class="saldo-label">Saldo em Créditos</div>
             <div class="saldo-valor" id="saldo-valor">0</div>
+
+            <!-- Controles de crédito -->
+            <div class="credit-controls" style="width:100%;margin-top:12px;">
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button id="dec-credit" class="scan-btn" style="width:44px;padding:8px;border-radius:8px;">-</button>
+                    <div id="selected-credits" style="min-width:48px;text-align:center;font-weight:800;color:#fff;font-size:1.05rem;">1</div>
+                    <button id="inc-credit" class="scan-btn" style="width:44px;padding:8px;border-radius:8px;">+</button>
+                    <div id="total-price" style="margin-left:auto;color:#fff;font-weight:700;">R$ 1,00</div>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:10px;align-items:center;">
+                    <button class="scan-btn" id="generate-pix">Gerar PIX</button>
+                    <button class="scan-btn" id="refresh-balance">Atualizar Saldo</button>
+                    <div id="refresh-spinner" style="display:none;"></div>
+                </div>
+            </div>
+
             <button class="scan-btn" id="scan-btn">Escanear Ponto</button>
             <div class="qr-result" id="qr-result"></div>
+
+            <!-- Resultado do PIX -->
+            <div id="pix-result" style="display:none;margin-top:12px;background:#fff;color:#000;padding:12px;border-radius:10px;">
+                <!-- preenchido dinamicamente -->
+            </div>
+
             <div id="qr-reader" style="width:100%;margin-top:10px;display:none;"></div>
         </div>
 
@@ -380,6 +415,14 @@
         const searchInput = document.getElementById('search-input');
         const searchBtn = document.getElementById('search-btn');
         const videosList = document.getElementById('videos-list');
+    const decCreditBtn = document.getElementById('dec-credit');
+    const incCreditBtn = document.getElementById('inc-credit');
+    const selectedCreditsEl = document.getElementById('selected-credits');
+    const totalPriceEl = document.getElementById('total-price');
+    const generatePixBtn = document.getElementById('generate-pix');
+    const pixResultEl = document.getElementById('pix-result');
+    const refreshBalanceBtn = document.getElementById('refresh-balance');
+    const refreshSpinner = document.getElementById('refresh-spinner');
 
         // LOGIN
         loginForm.addEventListener('submit', async function(e) {
@@ -423,6 +466,9 @@
                 searchSection.style.display = 'flex';
                 // inicia com pesquisa por pagodes conforme solicitado
                 buscarVideos('pagodes');
+
+                // inicializa controles de PIX/creditos
+                initCreditControls();
 
             } catch (err) {
                 loginError.textContent = err.message || 'Erro no login.';
@@ -544,6 +590,156 @@
                 };
                 videosList.appendChild(card);
             });
+        }
+
+        // ---------------------- PIX / Créditos ----------------------
+        function initCreditControls() {
+            // valores iniciais
+            let credits = 1;
+            const MIN_CREDITS = 1;
+            const MAX_CREDITS = 100;
+
+            function updateDisplay() {
+                selectedCreditsEl.textContent = String(credits);
+                const total = credits * 1.0; // cada crédito = R$1
+                totalPriceEl.textContent = total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace('.', ',').replace(/^(?=.)/, 'R$ ');
+            }
+
+            // listeners
+            incCreditBtn.addEventListener('click', () => {
+                if (credits < MAX_CREDITS) {
+                    credits++;
+                    updateDisplay();
+                }
+            });
+            decCreditBtn.addEventListener('click', () => {
+                if (credits > MIN_CREDITS) {
+                    credits--;
+                    updateDisplay();
+                }
+            });
+
+            generatePixBtn.addEventListener('click', async () => {
+                if (!usuarioLogado || !senhaLogada) {
+                    alert('Faça login antes de gerar PIX.');
+                    return;
+                }
+                pixResultEl.style.display = 'none';
+                const creditos = credits;
+                try {
+                    const url = `${GAS_URL}?rota=/gerar_pix&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&creditos=${encodeURIComponent(creditos)}`;
+                    const resp = await fetch(url);
+                    if (resp.status !== 200) {
+                        const t = await resp.text().catch(() => resp.statusText || 'Erro no servidor');
+                        throw new Error(t || ('Erro status ' + resp.status));
+                    }
+                    const data = await resp.json();
+
+                    // Exibe resultado: message e qr_code
+                    let html = '';
+                    if (data.message) html += `<div style="white-space:pre-wrap;margin-bottom:10px;">${escapeHtml(data.message)}</div>`;
+                    if (data.qr_code) {
+                        const qrImg = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(data.qr_code)}`;
+                        html += `<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;"><img src="${qrImg}" alt="QR" style="width:140px;height:140px;border-radius:8px;border:1px solid #eee;">`;
+                        html += `<div style="display:flex;flex-direction:column;gap:8px;">
+                                    <button class=\"scan-btn\" id=\"copy-pix-code\">Copiar código PIX</button>
+                                    <div style=\"font-weight:700;\">Valor: R$ ${Number(data.valor_calculado || creditos).toFixed(2).replace('.',',')}</div>
+                                    <div style=\"color:#555;font-size:0.95rem;\">Pagamento ID: ${data.payment_id || data.paymentId || '-'}</div>
+                                  </div></div>`;
+                        html += `<pre style="margin-top:10px;white-space:pre-wrap;word-break:break-all;background:#f6f5fa;padding:8px;border-radius:6px;">${escapeHtml(data.qr_code)}</pre>`;
+                    }
+                    html += `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;"><button class=\"scan-btn\" id=\"close-pix-result\">Fechar</button></div>`;
+
+                    pixResultEl.innerHTML = html;
+                    pixResultEl.style.display = 'block';
+
+                    // attach copy handler
+                    const copyBtn = document.getElementById('copy-pix-code');
+                    if (copyBtn) copyBtn.addEventListener('click', () => {
+                        if (data.qr_code) {
+                            navigator.clipboard.writeText(data.qr_code).then(() => alert('Código PIX copiado para a área de transferência.'))
+                                .catch(() => alert('Falha ao copiar.'));
+                        }
+                    });
+                    const closeBtn = document.getElementById('close-pix-result');
+                    if (closeBtn) closeBtn.addEventListener('click', () => pixResultEl.style.display = 'none');
+
+                } catch (err) {
+                    pixResultEl.style.display = 'block';
+                    pixResultEl.innerHTML = `<div style="color:#ff1744;font-weight:700;">${escapeHtml(err.message || 'Erro ao gerar PIX')}</div>`;
+                }
+            });
+
+            // Atualizar saldo (verificar pagamentos -> aguarda 1s -> consulta cliente)
+            refreshBalanceBtn.addEventListener('click', async () => {
+                if (!usuarioLogado || !senhaLogada) {
+                    alert('Faça login antes de atualizar o saldo.');
+                    return;
+                }
+
+                // mostra spinner e desabilita botão
+                try {
+                    refreshBalanceBtn.disabled = true;
+                    refreshBalanceBtn.style.opacity = '0.7';
+                    if (refreshSpinner) {
+                        refreshSpinner.className = 'spinner';
+                        refreshSpinner.style.display = 'inline-block';
+                    }
+
+                    // 1) chama rota /verificar_pagamentos (sem params conforme solicitado)
+                    const checkUrl = `${GAS_URL}?rota=/verificar_pagamentos`;
+                    const checkResp = await fetch(checkUrl);
+                    if (checkResp.status !== 200) {
+                        const t = await checkResp.text().catch(() => checkResp.statusText || 'Erro no servidor');
+                        throw new Error('Erro ao verificar pagamentos: ' + (t || checkResp.status));
+                    }
+
+                    // espera 1 segundo antes de consultar o cliente
+                    await new Promise(r => setTimeout(r, 1000));
+
+                    // 2) consulta cliente para atualizar saldo
+                    const url = `${GAS_URL}?rota=/consultar_cliente&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}`;
+                    const resp = await fetch(url);
+                    if (resp.status !== 200) {
+                        const t = await resp.text().catch(() => resp.statusText || 'Erro no servidor');
+                        throw new Error(t || ('Erro status ' + resp.status));
+                    }
+                    const data = await resp.json();
+                    if (data.error) throw new Error(data.error);
+
+                    // atualiza UI
+                    mostrarMenuLateral(data);
+                    pixResultEl.style.display = 'block';
+                    pixResultEl.innerHTML = `<div style="color:#2e7d32;font-weight:700;">Saldo atualizado: ${data.creditos !== undefined ? data.creditos : '0'} créditos</div>`;
+                    setTimeout(() => pixResultEl.style.display = 'none', 2500);
+
+                } catch (err) {
+                    pixResultEl.style.display = 'block';
+                    pixResultEl.innerHTML = `<div style="color:#ff1744;font-weight:700;">${escapeHtml(err.message || 'Erro ao atualizar saldo')}</div>`;
+                } finally {
+                    // esconde spinner e reabilita botão
+                    if (refreshSpinner) {
+                        refreshSpinner.style.display = 'none';
+                        refreshSpinner.className = '';
+                    }
+                    refreshBalanceBtn.disabled = false;
+                    refreshBalanceBtn.style.opacity = '1';
+                }
+            });
+
+            // primeira atualização do display
+            updateDisplay();
+        }
+
+        // utilidades
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
     </script>
 </body>
