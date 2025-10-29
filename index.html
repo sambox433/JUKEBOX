@@ -109,7 +109,7 @@ body {
 }
 .search-btn:hover { background:#5f199b; }
 
-.videos-list { width:100%; max-width:700px; display:flex; flex-wrap:wrap; gap:18px; justify-content:center; }
+.videos-list { width:100%; max-width:700px; display:flex; flex-wrap:wrap; gap:18px; justify-content:center; position:relative; }
 .video-card { width:210px; background:#fff; border-radius:16px; padding:14px; display:flex; flex-direction:column; align-items:center; cursor:pointer; transition:0.2s all; box-shadow:0 2px 12px #820ad122; }
 .video-card:hover { transform:translateY(-4px) scale(1.03); box-shadow:0 4px 24px #820ad144; }
 .video-thumb { width:100%; height:120px; object-fit:cover; border-radius:10px; margin-bottom:10px; }
@@ -132,6 +132,18 @@ body {
 }
 .login-btn:hover { background:#5f199b; }
 #login-error { color:#ff1744; font-weight:700; margin-top:12px; display:none; text-align:center; }
+
+/* Loader */
+.loader {
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid var(--nubank-purple);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 24px auto;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
 
 @media(max-width:600px){ .login-form{min-width:unset; padding:20px 16px;} .sidebar{width:100vw;} .main-content{padding:24px 12px;} .search-section{max-width:98vw;} .videos-list{max-width:98vw;} }
 </style>
@@ -204,8 +216,8 @@ const searchBtn = document.getElementById('search-btn');
 const videosList = document.getElementById('videos-list');
 let html5QrCode = null;
 
-// Substitua pela URL HTTPS do seu Apps Script
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqFww_x4hJbRu2m6a5J4WIJEvb6niLnBr8d-7E8bRO_o7jiet_09xx0YywPmoeuGvBOQ/exec";
+// Apps Script URL
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzGZEOZzukbwqmwMahndnV8OagscjxjSra1Ec_9M_TxZnz1xyD5VuE6RPptUDxjEQQMyA/exec";
 
 loginForm.addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -238,6 +250,7 @@ function mostrarMenuLateral(data){
     userAvatar.textContent = (data.nome && data.nome.length>0)?data.nome[0].toUpperCase():'?';
     userName.textContent = data.nome||'Não informado';
     userId.textContent = 'ID: '+(data.usuario_id||'Não informado');
+
     saldoValor.textContent = data.creditos!==undefined?data.creditos:'0';
 
     sideMenu.innerHTML = '';
@@ -273,7 +286,7 @@ searchBtn.addEventListener('click',()=>{ const termo=searchInput.value.trim(); b
 searchInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); searchBtn.click(); } });
 
 async function buscarVideos(termo){
-    videosList.innerHTML='<div style="color:#820ad1;font-weight:600;margin-top:24px;">Buscando músicas...</div>';
+    videosList.innerHTML='<div class="loader"></div>'; // Loader animado
     try{
         const url = `${APPS_SCRIPT_URL}?nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&acao=buscar_videos&q=${encodeURIComponent(termo)}`;
         const response = await fetch(url);
@@ -287,7 +300,10 @@ async function buscarVideos(termo){
 
 function renderizarVideos(videos){
     if(videos && Array.isArray(videos.results)) videos=videos.results;
-    if(!Array.isArray(videos)||videos.length===0){ videosList.innerHTML='<div style="color:#888;font-weight:600;margin-top:24px;">Nenhuma música encontrada.</div>'; return; }
+    if(!Array.isArray(videos)||videos.length===0){ 
+        videosList.innerHTML='<div style="color:#888;font-weight:600;margin-top:24px;">Nenhuma música encontrada.</div>'; 
+        return; 
+    }
     videosList.innerHTML='';
     videos.forEach(video=>{
         const card=document.createElement('div');
@@ -307,4 +323,3 @@ function enviarVideoParaMaquina(videoId){ alert('Vídeo enviado para a máquina!
 </script>
 </body>
 </html>
-
