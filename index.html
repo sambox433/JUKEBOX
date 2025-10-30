@@ -841,6 +841,11 @@
                         </div>
                     `;
 
+                    // store important music metadata on the overlay so the send handler always reads the same values
+                    const resolvedMusicId = getVideoId(video) || (video.id || '');
+                    overlay.dataset.musicId = resolvedMusicId;
+                    overlay.dataset.musicTitle = (video.title || video.titulo || '');
+                    overlay.dataset.musicAuthor = (video.author || video.artist || '');
                     document.body.appendChild(overlay);
 
                     const btnCancel = overlay.querySelector('#modal-cancel');
@@ -865,14 +870,14 @@
                         btnCancel.disabled = true;
                         btnSend.style.opacity = '0.7';
 
-            try {
-                // envia tanto o nome formatado (compat) quanto campos separados: id, titulo, cantor e youtube id
-                const musicId = getVideoId(video) || (video.id || '');
-                const musicTitle = (video.title || video.titulo || '').toString();
-                const musicAuthor = (video.author || video.artist || '').toString();
-                const musicName = `${musicTitle}${musicAuthor ? ' - ' + musicAuthor : ''}`.trim();
-                const url = `${GAS_URL}?rota=/adicionar_musica&ponto_id=${encodeURIComponent(ponto)}&nome_cliente=${encodeURIComponent(usuarioLogado)}&senha_cliente=${encodeURIComponent(senhaLogada)}&musica=${encodeURIComponent(musicName)}&musica_id=${encodeURIComponent(musicId)}&musica_youtube_id=${encodeURIComponent(musicId)}&musica_titulo=${encodeURIComponent(musicTitle)}&musica_cantor=${encodeURIComponent(musicAuthor)}`;
-                            const resp = await fetch(url);
+                    try {
+                        // read values stored on overlay (guarantees we send the same id that was displayed)
+                        const musicId = overlay.dataset.musicId || '';
+                        const musicTitle = overlay.dataset.musicTitle || '';
+                        const musicAuthor = overlay.dataset.musicAuthor || '';
+                        const musicName = `${musicTitle}${musicAuthor ? ' - ' + musicAuthor : ''}`.trim();
+                        const url = `${GAS_URL}?rota=/adicionar_musica&ponto_id=${encodeURIComponent(ponto)}&nome_cliente=${encodeURIComponent(usuarioLogado)}&senha_cliente=${encodeURIComponent(senhaLogada)}&musica=${encodeURIComponent(musicName)}&musica_id=${encodeURIComponent(musicId)}&musica_youtube_id=${encodeURIComponent(musicId)}&musica_titulo=${encodeURIComponent(musicTitle)}&musica_cantor=${encodeURIComponent(musicAuthor)}`;
+                        const resp = await fetch(url);
                             if (resp.status !== 200) {
                                 const t = await resp.text().catch(() => resp.statusText || 'Erro no servidor');
                                 throw new Error(t || ('Erro status ' + resp.status));
