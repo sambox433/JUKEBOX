@@ -873,12 +873,17 @@
                     if (data.message || data.status === 'sucesso') {
                         modalMsg.style.color = '#2e7d32';
                         modalMsg.textContent = data.message || "Música enviada com sucesso!";
+                        
+                        // Aguarda 3 segundos e atualiza o saldo
+                        setTimeout(async () => {
+                            await updateBalance(true); // true indica que é após envio de música (pode ajustar mensagem se quiser)
+                            overlay.remove();
+                        }, 3000);
                     } else {
                         modalMsg.style.color = '#ff1744';
                         modalMsg.textContent = data.error || "Erro ao enviar música";
+                        setTimeout(() => overlay.remove(), 1500);
                     }
-
-                    setTimeout(() => overlay.remove(), 1500);
                 } catch (err) {
                     modalMsg.style.display = 'block';
                     modalMsg.style.color = '#ff1744';
@@ -886,8 +891,68 @@
                     btnSend.disabled = false;
                     btnCancel.disabled = false;
                     btnSend.style.opacity = '1';
+                    setTimeout(() => overlay.remove(), 1500);
                 }
             });
+        }
+
+        // Função para atualizar saldo (reutilizável)
+        async function updateBalance(isAfterMusicSend = false) {
+            if (!usuarioLogado || !senhaLogada) {
+                alert('Faça login antes de atualizar o saldo.');
+                return;
+            }
+
+            try {
+                // Mostra spinner se não for após envio de música (para evitar spam de UI)
+                if (!isAfterMusicSend && refreshSpinner) {
+                    refreshSpinner.className = 'spinner';
+                    refreshSpinner.style.display = 'inline-block';
+                }
+
+                // 1) chama rota /verificar_pagamentos (sem params conforme solicitado)
+                const checkUrl = `${GAS_URL}?rota=/verificar_pagamentos`;
+                const checkResp = await fetch(checkUrl);
+                if (checkResp.status !== 200) {
+                    const t = await checkResp.text().catch(() => checkResp.statusText || 'Erro no servidor');
+                    throw new Error('Erro ao verificar pagamentos: ' + (t || checkResp.status));
+                }
+
+                // espera 1 segundo antes de consultar o cliente
+                await new Promise(r => setTimeout(r, 1000));
+
+                // 2) consulta cliente para atualizar saldo
+                const url = `${GAS_URL}?rota=/consultar_cliente&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}`;
+                const resp = await fetch(url);
+                if (resp.status !== 200) {
+                    const t = await resp.text().catch(() => resp.statusText || 'Erro no servidor');
+                    throw new Error(t || ('Erro status ' + resp.status));
+                }
+                const data = await resp.json();
+                if (data.error) throw new Error(data.error);
+
+                // atualiza UI
+                mostrarMenuLateral(data);
+                
+                // Mostra mensagem de sucesso (ajustada se for após música)
+                const message = isAfterMusicSend 
+                    ? `Música enviada! Saldo atualizado: ${data.creditos !== undefined ? data.creditos : '0'} créditos` 
+                    : `Saldo atualizado: ${data.creditos !== undefined ? data.creditos : '0'} créditos`;
+                pixResultEl.style.display = 'block';
+                pixResultEl.innerHTML = `<div style="color:#2e7d32;font-weight:700;">${message}</div>`;
+                setTimeout(() => pixResultEl.style.display = 'none', 2500);
+
+            } catch (err) {
+                pixResultEl.style.display = 'block';
+                pixResultEl.innerHTML = `<div style="color:#ff1744;font-weight:700;">${escapeHtml(err.message || 'Erro ao atualizar saldo')}</div>`;
+                setTimeout(() => pixResultEl.style.display = 'none', 2500);
+            } finally {
+                // esconde spinner se aplicável
+                if (!isAfterMusicSend && refreshSpinner) {
+                    refreshSpinner.style.display = 'none';
+                    refreshSpinner.className = '';
+                }
+            }
         }
 
         // ---------------------- PIX / Créditos ----------------------
@@ -979,61 +1044,13 @@
                 }
             });
 
-            // Atualizar saldo (verificar pagamentos -> aguarda 1s -> consulta cliente)
+            // Atualizar saldo (chama a função reutilizável)
             refreshBalanceBtn.addEventListener('click', async () => {
-                if (!usuarioLogado || !senhaLogada) {
-                    alert('Faça login antes de atualizar o saldo.');
-                    return;
-                }
-
-                // mostra spinner e desabilita botão
-                try {
-                    refreshBalanceBtn.disabled = true;
-                    refreshBalanceBtn.style.opacity = '0.7';
-                    if (refreshSpinner) {
-                        refreshSpinner.className = 'spinner';
-                        refreshSpinner.style.display = 'inline-block';
-                    }
-
-                    // 1) chama rota /verificar_pagamentos (sem params conforme solicitado)
-                    const checkUrl = `${GAS_URL}?rota=/verificar_pagamentos`;
-                    const checkResp = await fetch(checkUrl);
-                    if (checkResp.status !== 200) {
-                        const t = await checkResp.text().catch(() => checkResp.statusText || 'Erro no servidor');
-                        throw new Error('Erro ao verificar pagamentos: ' + (t || checkResp.status));
-                    }
-
-                    // espera 1 segundo antes de consultar o cliente
-                    await new Promise(r => setTimeout(r, 1000));
-
-                    // 2) consulta cliente para atualizar saldo
-                    const url = `${GAS_URL}?rota=/consultar_cliente&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}`;
-                    const resp = await fetch(url);
-                    if (resp.status !== 200) {
-                        const t = await resp.text().catch(() => resp.statusText || 'Erro no servidor');
-                        throw new Error(t || ('Erro status ' + resp.status));
-                    }
-                    const data = await resp.json();
-                    if (data.error) throw new Error(data.error);
-
-                    // atualiza UI
-                    mostrarMenuLateral(data);
-                    pixResultEl.style.display = 'block';
-                    pixResultEl.innerHTML = `<div style="color:#2e7d32;font-weight:700;">Saldo atualizado: ${data.creditos !== undefined ? data.creditos : '0'} créditos</div>`;
-                    setTimeout(() => pixResultEl.style.display = 'none', 2500);
-
-                } catch (err) {
-                    pixResultEl.style.display = 'block';
-                    pixResultEl.innerHTML = `<div style="color:#ff1744;font-weight:700;">${escapeHtml(err.message || 'Erro ao atualizar saldo')}</div>`;
-                } finally {
-                    // esconde spinner e reabilita botão
-                    if (refreshSpinner) {
-                        refreshSpinner.style.display = 'none';
-                        refreshSpinner.className = '';
-                    }
-                    refreshBalanceBtn.disabled = false;
-                    refreshBalanceBtn.style.opacity = '1';
-                }
+                refreshBalanceBtn.disabled = true;
+                refreshBalanceBtn.style.opacity = '0.7';
+                await updateBalance(false);
+                refreshBalanceBtn.disabled = false;
+                refreshBalanceBtn.style.opacity = '1';
             });
 
             // primeira atualização do display
