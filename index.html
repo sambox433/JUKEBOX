@@ -813,101 +813,91 @@
                     return '';
                 }
 
-                // mostra modal full-screen (centralizado) para confirmar envio
                 function showCardModal(video, card) {
-                    // remove qualquer modal existente
-                    const existingOverlay = document.querySelector('.fullscreen-modal');
-                    if (existingOverlay) existingOverlay.remove();
+                const existingOverlay = document.querySelector('.fullscreen-modal');
+                if (existingOverlay) existingOverlay.remove();
 
-                    const overlay = document.createElement('div');
-                    overlay.className = 'fullscreen-modal';
+                const overlay = document.createElement('div');
+                overlay.className = 'fullscreen-modal';
 
-                    const title = escapeHtml(video.title || video.titulo || 'Sem título');
-                    const author = escapeHtml(video.author || 'Desconhecido');
-                    const youtubeId = escapeHtml(getVideoId(video) || (video.id && typeof video.id === 'string' ? video.id : ''));
-                    const pontoId = document.getElementById('id-ponto') ? document.getElementById('id-ponto').textContent.trim() : '';
+                const title = escapeHtml(video.title || video.titulo || 'Sem título');
+                const author = escapeHtml(video.author || 'Desconhecido');
+                const youtubeId = escapeHtml(getVideoId(video) || (video.id && typeof video.id === 'string' ? video.id : ''));
+                const pontoId = document.getElementById('id-ponto') ? document.getElementById('id-ponto').textContent.trim() : '';
 
-                    overlay.innerHTML = `
-                        <div class="modal-content">
-                            <div class="modal-row"><strong>Enviar música para o ponto</strong><div>ID: <span style="font-weight:700;">${escapeHtml(pontoId || '0')}</span></div></div>
-                            <div>Título: <strong>${title}</strong></div>
-                            <div>Artista: ${author}</div>
-                            <div style="font-size:0.95rem;color:#666;">YouTube ID: <strong style="color:#222;">${youtubeId || '-'}</strong></div>
-                            <div class="modal-actions">
-                                <button class="scan-btn" id="modal-send">Enviar Música</button>
-                                <button class="scan-btn" id="modal-cancel">Cancelar</button>
-                            </div>
-                            <div id="modal-msg" style="margin-top:6px;font-weight:700;color:#2e7d32;display:none;"></div>
-                        </div>
-                    `;
+                overlay.innerHTML = `
+                    <div class="modal-content">
+                    <div class="modal-row"><strong>Enviar música para o ponto</strong><div>ID: <span style="font-weight:700;">${escapeHtml(pontoId || '0')}</span></div></div>
+                    <div>Título: <strong>${title}</strong></div>
+                    <div>Artista: ${author}</div>
+                    <div style="font-size:0.95rem;color:#666;">YouTube ID: <strong style="color:#222;">${youtubeId || '-'}</strong></div>
+                    <div class="modal-actions">
+                        <button class="scan-btn" id="modal-send">Enviar Música</button>
+                        <button class="scan-btn" id="modal-cancel">Cancelar</button>
+                    </div>
+                    <div id="modal-msg" style="margin-top:6px;font-weight:700;color:#2e7d32;display:none;"></div>
+                    </div>
+                `;
 
-                    // store important music metadata on the overlay so the send handler always reads the same values
-                    const resolvedMusicId = getVideoId(video) || (video.id || '');
-                    // explicitly store both musicId and youtubeId to avoid any mismatch between display and send
-                    overlay.dataset.musicId = resolvedMusicId;
-                    overlay.dataset.youtubeId = resolvedMusicId;
-                    overlay.dataset.musicTitle = (video.title || video.titulo || '');
-                    overlay.dataset.musicAuthor = (video.author || video.artist || '');
-                    document.body.appendChild(overlay);
+                overlay.dataset.musicId = getVideoId(video) || video.id || '';
+                overlay.dataset.musicTitle = video.title || video.titulo || '';
+                overlay.dataset.musicAuthor = video.author || video.artist || '';
+                document.body.appendChild(overlay);
 
-                    const btnCancel = overlay.querySelector('#modal-cancel');
-                    const btnSend = overlay.querySelector('#modal-send');
-                    const modalMsg = overlay.querySelector('#modal-msg');
+                const btnCancel = overlay.querySelector('#modal-cancel');
+                const btnSend = overlay.querySelector('#modal-send');
+                const modalMsg = overlay.querySelector('#modal-msg');
 
-                    btnCancel.addEventListener('click', () => overlay.remove());
+                btnCancel.addEventListener('click', () => overlay.remove());
 
-                        // Replace send logic: use combined video_info = title*youtubeId and send to rota=/enviar_musica
-                        btnSend.addEventListener('click', async () => {
-                            const ponto = document.getElementById('id-ponto') ? document.getElementById('id-ponto').textContent.trim() : '';
-                            if (!ponto || ponto === '0') {
-                                alert('Por favor, escaneie o ponto antes de enviar a música.');
-                                return;
-                            }
-                            if (!usuarioLogado || !senhaLogada) {
-                                alert('Faça login antes de enviar música.');
-                                return;
-                            }
-
-                            // desabilita botões
-                            btnSend.disabled = true;
-                            btnCancel.disabled = true;
-                            btnSend.style.opacity = '0.7';
-
-                            try {
-                                const musicTitle = overlay.dataset.musicTitle || '';
-                                const youtubeId = overlay.dataset.youtubeId || '';
-                                const videoInfo = `${musicTitle}*${youtubeId}`;
-
-                                const url = `${GAS_URL}?rota=/enviar_musica&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&id_ponto=${encodeURIComponent(ponto)}&video_info=${encodeURIComponent(videoInfo)}`;
-
-                                const resp = await fetch(url);
-                                if (resp.status !== 200) {
-                                    const t = await resp.text().catch(() => resp.statusText || 'Erro no servidor');
-                                    throw new Error(t || ('Erro status ' + resp.status));
-                                }
-                                const data = await resp.json();
-
-                                modalMsg.style.display = 'block';
-                                if (data.status === 'sucesso' || data.message || !data.error) {
-                                    modalMsg.style.color = '#2e7d32';
-                                    modalMsg.textContent = data.message || 'Música enviada com sucesso!';
-                                } else {
-                                    modalMsg.style.color = '#ff1744';
-                                    modalMsg.textContent = data.mensagem || data.error || 'Erro ao enviar música';
-                                }
-
-                                setTimeout(() => overlay.remove(), 1200);
-                            } catch (err) {
-                                modalMsg.style.display = 'block';
-                                modalMsg.style.color = '#ff1744';
-                                modalMsg.textContent = err.message || 'Erro ao enviar música';
-                                btnSend.disabled = false;
-                                btnCancel.disabled = false;
-                                btnSend.style.opacity = '1';
-                            }
-                        });
+                btnSend.addEventListener('click', async () => {
+                    const ponto = document.getElementById('id-ponto') ? document.getElementById('id-ponto').textContent.trim() : '';
+                    if (!ponto || ponto === '0') {
+                    alert('Por favor, escaneie o ponto antes de enviar a música.');
+                    return;
+                    }
+                    if (!usuarioLogado || !senhaLogada) {
+                    alert('Faça login antes de enviar música.');
+                    return;
                     }
 
+                    btnSend.disabled = true;
+                    btnCancel.disabled = true;
+                    btnSend.style.opacity = '0.7';
+
+                    try {
+                    const musicTitle = overlay.dataset.musicTitle || '';
+                    const youtubeId = overlay.dataset.musicId || '';
+                    const videoInfo = `${musicTitle}*${youtubeId}`;
+
+                    const url = `${GAS_URL}?rota=/adicionar_musica&ponto_id=${encodeURIComponent(ponto)}&nome_cliente=${encodeURIComponent(usuarioLogado)}&senha_cliente=${encodeURIComponent(senhaLogada)}&musica=${encodeURIComponent(videoInfo)}`;
+                    console.log("🎵 Enviando música:", url);
+
+                    const resp = await fetch(url);
+                    if (resp.status !== 200) throw new Error(`Erro HTTP ${resp.status}`);
+
+                    let data;
+                    try {
+                        data = await resp.json();
+                    } catch {
+                        data = { message: await resp.text() };
+                    }
+
+                    modalMsg.style.display = 'block';
+                    modalMsg.style.color = '#2e7d32';
+                    modalMsg.textContent = data.message || data.mensagem || 'Música enviada com sucesso!';
+
+                    setTimeout(() => overlay.remove(), 1500);
+                    } catch (err) {
+                    modalMsg.style.display = 'block';
+                    modalMsg.style.color = '#ff1744';
+                    modalMsg.textContent = err.message || 'Erro ao enviar música';
+                    btnSend.disabled = false;
+                    btnCancel.disabled = false;
+                    btnSend.style.opacity = '1';
+                    }
+                });
+                }
         // ---------------------- PIX / Créditos ----------------------
         function initCreditControls() {
             // valores iniciais
