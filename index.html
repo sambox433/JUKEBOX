@@ -843,7 +843,9 @@
 
                     // store important music metadata on the overlay so the send handler always reads the same values
                     const resolvedMusicId = getVideoId(video) || (video.id || '');
+                    // explicitly store both musicId and youtubeId to avoid any mismatch between display and send
                     overlay.dataset.musicId = resolvedMusicId;
+                    overlay.dataset.youtubeId = resolvedMusicId;
                     overlay.dataset.musicTitle = (video.title || video.titulo || '');
                     overlay.dataset.musicAuthor = (video.author || video.artist || '');
                     document.body.appendChild(overlay);
@@ -854,53 +856,57 @@
 
                     btnCancel.addEventListener('click', () => overlay.remove());
 
-                    btnSend.addEventListener('click', async () => {
-                        const ponto = document.getElementById('id-ponto') ? document.getElementById('id-ponto').textContent.trim() : '';
-                        if (!ponto || ponto === '0') {
-                            alert('Por favor, escaneie o ponto antes de enviar a música.');
-                            return;
-                        }
-                        if (!usuarioLogado || !senhaLogada) {
-                            alert('Faça login antes de enviar música.');
-                            return;
-                        }
-
-                        // desabilita botões
-                        btnSend.disabled = true;
-                        btnCancel.disabled = true;
-                        btnSend.style.opacity = '0.7';
-
-                    try {
-                        // read values stored on overlay (guarantees we send the same id that was displayed)
-                        const musicId = overlay.dataset.musicId || '';
-                        const musicTitle = overlay.dataset.musicTitle || '';
-                        const musicAuthor = overlay.dataset.musicAuthor || '';
-                        const musicName = `${musicTitle}${musicAuthor ? ' - ' + musicAuthor : ''}`.trim();
-                        const url = `${GAS_URL}?rota=/adicionar_musica&ponto_id=${encodeURIComponent(ponto)}&nome_cliente=${encodeURIComponent(usuarioLogado)}&senha_cliente=${encodeURIComponent(senhaLogada)}&musica=${encodeURIComponent(musicName)}&musica_id=${encodeURIComponent(musicId)}&musica_youtube_id=${encodeURIComponent(musicId)}&musica_titulo=${encodeURIComponent(musicTitle)}&musica_cantor=${encodeURIComponent(musicAuthor)}`;
-                        const resp = await fetch(url);
-                            if (resp.status !== 200) {
-                                const t = await resp.text().catch(() => resp.statusText || 'Erro no servidor');
-                                throw new Error(t || ('Erro status ' + resp.status));
+                        // Replace send logic: use combined video_info = title*youtubeId and send to rota=/enviar_musica
+                        btnSend.addEventListener('click', async () => {
+                            const ponto = document.getElementById('id-ponto') ? document.getElementById('id-ponto').textContent.trim() : '';
+                            if (!ponto || ponto === '0') {
+                                alert('Por favor, escaneie o ponto antes de enviar a música.');
+                                return;
                             }
-                            const data = await resp.json();
+                            if (!usuarioLogado || !senhaLogada) {
+                                alert('Faça login antes de enviar música.');
+                                return;
+                            }
 
-                            // sucesso: mostra mensagem e fecha modal
-                            modalMsg.style.display = 'block';
-                            modalMsg.style.color = data.error ? '#ff1744' : '#2e7d32';
-                            modalMsg.textContent = data.error ? (data.error || 'Erro') : (data.message || 'Música enviada com sucesso!');
+                            // desabilita botões
+                            btnSend.disabled = true;
+                            btnCancel.disabled = true;
+                            btnSend.style.opacity = '0.7';
 
-                            setTimeout(() => overlay.remove(), 1400);
-                        } catch (err) {
-                            modalMsg.style.display = 'block';
-                            modalMsg.style.color = '#ff1744';
-                            modalMsg.textContent = err.message || 'Erro ao enviar música';
-                            // reabilita botões para nova tentativa
-                            btnSend.disabled = false;
-                            btnCancel.disabled = false;
-                            btnSend.style.opacity = '1';
-                        }
-                    });
-                }
+                            try {
+                                const musicTitle = overlay.dataset.musicTitle || '';
+                                const youtubeId = overlay.dataset.youtubeId || '';
+                                const videoInfo = `${musicTitle}*${youtubeId}`;
+
+                                const url = `${GAS_URL}?rota=/enviar_musica&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&id_ponto=${encodeURIComponent(ponto)}&video_info=${encodeURIComponent(videoInfo)}`;
+
+                                const resp = await fetch(url);
+                                if (resp.status !== 200) {
+                                    const t = await resp.text().catch(() => resp.statusText || 'Erro no servidor');
+                                    throw new Error(t || ('Erro status ' + resp.status));
+                                }
+                                const data = await resp.json();
+
+                                modalMsg.style.display = 'block';
+                                if (data.status === 'sucesso' || data.message || !data.error) {
+                                    modalMsg.style.color = '#2e7d32';
+                                    modalMsg.textContent = data.message || 'Música enviada com sucesso!';
+                                } else {
+                                    modalMsg.style.color = '#ff1744';
+                                    modalMsg.textContent = data.mensagem || data.error || 'Erro ao enviar música';
+                                }
+
+                                setTimeout(() => overlay.remove(), 1200);
+                            } catch (err) {
+                                modalMsg.style.display = 'block';
+                                modalMsg.style.color = '#ff1744';
+                                modalMsg.textContent = err.message || 'Erro ao enviar música';
+                                btnSend.disabled = false;
+                                btnCancel.disabled = false;
+                                btnSend.style.opacity = '1';
+                            }
+                        });
+                    }
 
         // ---------------------- PIX / Créditos ----------------------
         function initCreditControls() {
