@@ -622,41 +622,112 @@
             setField(fieldTelefone);
         }
 
-        // QR CODE
-        scanBtn.addEventListener('click', function() {
+        // QR CODE: now displays as a top-centered overlay so camera appears near the top of the screen
+        function createQrOverlay() {
+            // remove existing overlay if any
+            const existing = document.getElementById('qr-overlay');
+            if (existing) existing.remove();
+
+            const overlay = document.createElement('div');
+            overlay.id = 'qr-overlay';
+            overlay.style.position = 'fixed';
+            overlay.style.top = '12px';
+            overlay.style.left = '50%';
+            overlay.style.transform = 'translateX(-50%)';
+            overlay.style.zIndex = '12000';
+            overlay.style.width = '92%';
+            overlay.style.maxWidth = '480px';
+            overlay.style.background = 'rgba(255,255,255,0.02)';
+            overlay.style.padding = '6px';
+            overlay.style.borderRadius = '10px';
+            overlay.style.display = 'flex';
+            overlay.style.flexDirection = 'column';
+            overlay.style.alignItems = 'stretch';
+
+            // close row
+            const topRow = document.createElement('div');
+            topRow.style.display = 'flex';
+            topRow.style.justifyContent = 'flex-end';
+
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'scan-btn';
+            closeBtn.textContent = 'Fechar';
+            closeBtn.style.padding = '6px 10px';
+            closeBtn.style.minWidth = '80px';
+            closeBtn.addEventListener('click', () => {
+                pararLeitorQR();
+            });
+            topRow.appendChild(closeBtn);
+
+            const readerDiv = document.createElement('div');
+            readerDiv.id = 'qr-reader-overlay';
+            readerDiv.style.width = '100%';
+            readerDiv.style.borderRadius = '8px';
+            readerDiv.style.overflow = 'hidden';
+            readerDiv.style.background = '#000';
+            readerDiv.style.display = 'block';
+            readerDiv.style.padding = '6px';
+
+            overlay.appendChild(topRow);
+            overlay.appendChild(readerDiv);
+
+            document.body.appendChild(overlay);
+            return readerDiv.id;
+        }
+
+        scanBtn.addEventListener('click', async function() {
             qrResult.style.display = 'none';
-            if (qrReader.style.display === 'block') {
+            // if already running, stop
+            if (document.getElementById('qr-overlay')) {
                 pararLeitorQR();
                 return;
             }
-            qrReader.style.display = 'block';
-            if (!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader");
 
+            // create overlay and start scanner there so camera is near the top
+            const readerId = createQrOverlay();
+            if (html5QrCode) {
+                try { await html5QrCode.stop(); } catch(e) {}
+                html5QrCode.clear();
+                html5QrCode = null;
+            }
+
+            html5QrCode = new Html5Qrcode(readerId);
             html5QrCode.start(
-                { facingMode: "environment" },
-                { fps: 10, qrbox: 220 },
+                { facingMode: 'environment' },
+                { fps: 10, qrbox: { width: 260, height: 160 } },
                 qrCodeMessage => {
                     qrResult.style.display = 'block';
                     qrResult.textContent = 'Valor escaneado: ' + qrCodeMessage;
-                    // atualiza o ID do ponto com o resultado do escaneamento
                     const idPontoEl = document.getElementById('id-ponto');
                     if (idPontoEl) idPontoEl.textContent = qrCodeMessage;
                     pararLeitorQR();
                 },
-                () => {}
+                errorMessage => {
+                    // ignore intermittent decode errors
+                }
             ).catch(err => {
                 qrResult.style.display = 'block';
                 qrResult.textContent = 'Erro na câmera: ' + err;
-                pararLeitorQR();
+                // remove overlay if failed to start
+                const ov = document.getElementById('qr-overlay');
+                if (ov) ov.remove();
             });
         });
 
-        function pararLeitorQR() {
-            if (html5QrCode) {
-                html5QrCode.stop().finally(() => {
-                    qrReader.style.display = 'none';
-                });
+        async function pararLeitorQR() {
+            try {
+                if (html5QrCode) {
+                    await html5QrCode.stop();
+                    try { html5QrCode.clear(); } catch(e) {}
+                    html5QrCode = null;
+                }
+            } catch (e) {
+                // ignore
             }
+            const ov = document.getElementById('qr-overlay');
+            if (ov) ov.remove();
+            // also hide legacy qrReader if present
+            if (qrReader) qrReader.style.display = 'none';
         }
 
         // BUSCA DE VÍDEOS
@@ -715,6 +786,33 @@
             });
         }
 
+                // util: extrai um possível YouTube id de vários formatos de objeto/URL
+                function getVideoId(video) {
+                    if (!video) return '';
+                    // caso id seja um objeto do tipo { videoId: '...' }
+                    if (typeof video.id === 'object' && video.id !== null) {
+                        if (video.id.videoId) return String(video.id.videoId);
+                        if (video.id['#text']) return String(video.id['#text']);
+                    }
+                    // propriedades comuns
+                    if (video.videoId) return String(video.videoId);
+                    if (video.ytId) return String(video.ytId);
+                    if (video.video_id) return String(video.video_id);
+                    if (typeof video.id === 'string') {
+                        // se for uma URL do youtube, extrai o id
+                        const s = video.id;
+                        const m = s.match(/(?:v=|\/v\/|youtu\.be\/|embed\/)([A-Za-z0-9_-]{6,})/);
+                        if (m && m[1]) return m[1];
+                        return s;
+                    }
+                    // tenta extrair de uma eventual url
+                    if (video.url && typeof video.url === 'string') {
+                        const m2 = video.url.match(/(?:v=|\/v\/|youtu\.be\/|embed\/)([A-Za-z0-9_-]{6,})/);
+                        if (m2 && m2[1]) return m2[1];
+                    }
+                    return '';
+                }
+
                 // mostra modal full-screen (centralizado) para confirmar envio
                 function showCardModal(video, card) {
                     // remove qualquer modal existente
@@ -726,6 +824,7 @@
 
                     const title = escapeHtml(video.title || video.titulo || 'Sem título');
                     const author = escapeHtml(video.author || 'Desconhecido');
+                    const youtubeId = escapeHtml(getVideoId(video) || (video.id && typeof video.id === 'string' ? video.id : ''));
                     const pontoId = document.getElementById('id-ponto') ? document.getElementById('id-ponto').textContent.trim() : '';
 
                     overlay.innerHTML = `
@@ -733,6 +832,7 @@
                             <div class="modal-row"><strong>Enviar música para o ponto</strong><div>ID: <span style="font-weight:700;">${escapeHtml(pontoId || '0')}</span></div></div>
                             <div>Título: <strong>${title}</strong></div>
                             <div>Artista: ${author}</div>
+                            <div style="font-size:0.95rem;color:#666;">YouTube ID: <strong style="color:#222;">${youtubeId || '-'}</strong></div>
                             <div class="modal-actions">
                                 <button class="scan-btn" id="modal-send">Enviar Música</button>
                                 <button class="scan-btn" id="modal-cancel">Cancelar</button>
@@ -765,13 +865,13 @@
                         btnCancel.disabled = true;
                         btnSend.style.opacity = '0.7';
 
-                try {
-                    // envia tanto o nome formatado (compat) quanto campos separados: id, titulo e cantor
-                    const musicId = (video.id || video.videoId || video.video_id || video.ytId || '').toString();
-                    const musicTitle = (video.title || video.titulo || '').toString();
-                    const musicAuthor = (video.author || video.artist || '').toString();
-                    const musicName = `${musicTitle}${musicAuthor ? ' - ' + musicAuthor : ''}`.trim();
-                    const url = `${GAS_URL}?rota=/adicionar_musica&ponto_id=${encodeURIComponent(ponto)}&nome_cliente=${encodeURIComponent(usuarioLogado)}&senha_cliente=${encodeURIComponent(senhaLogada)}&musica=${encodeURIComponent(musicName)}&musica_id=${encodeURIComponent(musicId)}&musica_titulo=${encodeURIComponent(musicTitle)}&musica_cantor=${encodeURIComponent(musicAuthor)}`;
+            try {
+                // envia tanto o nome formatado (compat) quanto campos separados: id, titulo, cantor e youtube id
+                const musicId = getVideoId(video) || (video.id || '');
+                const musicTitle = (video.title || video.titulo || '').toString();
+                const musicAuthor = (video.author || video.artist || '').toString();
+                const musicName = `${musicTitle}${musicAuthor ? ' - ' + musicAuthor : ''}`.trim();
+                const url = `${GAS_URL}?rota=/adicionar_musica&ponto_id=${encodeURIComponent(ponto)}&nome_cliente=${encodeURIComponent(usuarioLogado)}&senha_cliente=${encodeURIComponent(senhaLogada)}&musica=${encodeURIComponent(musicName)}&musica_id=${encodeURIComponent(musicId)}&musica_youtube_id=${encodeURIComponent(musicId)}&musica_titulo=${encodeURIComponent(musicTitle)}&musica_cantor=${encodeURIComponent(musicAuthor)}`;
                             const resp = await fetch(url);
                             if (resp.status !== 200) {
                                 const t = await resp.text().catch(() => resp.statusText || 'Erro no servidor');
@@ -840,20 +940,31 @@
                     }
                     const data = await resp.json();
 
-                    // Exibe resultado: message e qr_code
+                    // Exibe resultado: message, qr_code centralizado, cópia e instrução
                     let html = '';
-                    if (data.message) html += `<div style="white-space:pre-wrap;margin-bottom:10px;">${escapeHtml(data.message)}</div>`;
-                    if (data.qr_code) {
-                        const qrImg = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(data.qr_code)}`;
-                        html += `<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;"><img src="${qrImg}" alt="QR" style="width:140px;height:140px;border-radius:8px;border:1px solid #eee;">`;
-                        html += `<div style="display:flex;flex-direction:column;gap:8px;">
-                                    <button class=\"scan-btn\" id=\"copy-pix-code\">Copiar código PIX</button>
-                                    <div style=\"font-weight:700;\">Valor: R$ ${Number(data.valor_calculado || creditos).toFixed(2).replace('.',',')}</div>
-                                    <div style=\"color:#555;font-size:0.95rem;\">Pagamento ID: ${data.payment_id || data.paymentId || '-'}</div>
-                                  </div></div>`;
-                        html += `<pre style="margin-top:10px;white-space:pre-wrap;word-break:break-all;background:#f6f5fa;padding:8px;border-radius:6px;">${escapeHtml(data.qr_code)}</pre>`;
+                    html += `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;">`;
+                    if (data.message) {
+                        // hide very verbose/system-generated payment template messages (contain PIX payload or long boilerplate)
+                        const msg = String(data.message || '');
+                        const verbosePattern = /br\.gov\.bcb\.pix|000201|Pagamento via PIX|Karaoke Premium|Atenção: Você tem até/i;
+                        if (verbosePattern.test(msg) || msg.length > 300) {
+                            // show a compact confirmation instead of the full template
+                            html += `<div style="margin-bottom:4px;text-align:center;color:#333;font-weight:600;">PIX gerado com sucesso. Copie a chave abaixo e pague pelo seu banco.</div>`;
+                        } else {
+                            html += `<div style="white-space:pre-wrap;margin-bottom:4px;text-align:center;color:#333;font-weight:600;">${escapeHtml(msg)}</div>`;
+                        }
                     }
-                    html += `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;"><button class=\"scan-btn\" id=\"close-pix-result\">Fechar</button></div>`;
+                    if (data.qr_code) {
+                        const qrImg = `https://api.qrserver.com/v1/create-qr-code/?size=360x360&data=${encodeURIComponent(data.qr_code)}`;
+                        html += `<img src="${qrImg}" alt="QR" style="width:180px;height:180px;border-radius:8px;border:1px solid #eee;">`;
+                        html += `<pre id="pix-code-pre" style="margin:0;white-space:pre-wrap;word-break:break-all;background:#f6f5fa;padding:12px;border-radius:6px;max-width:92%;text-align:left;font-size:0.95rem;">${escapeHtml(data.qr_code)}</pre>`;
+                        html += `<div style="font-size:0.95rem;color:#555;margin-top:8px;text-align:center;">Copie a chave PIX acima e pague com seu banco. Seus créditos serão atualizados após confirmação.</div>`;
+                        html += `<div style="display:flex;gap:8px;margin-top:8px;">`;
+                        html += `<button class=\"scan-btn\" id=\"copy-pix-code\">Copiar código PIX</button>`;
+                        html += `</div>`;
+                    }
+                    html += `</div>`;
+                    html += `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;"><button class=\"scan-btn\" id=\"close-pix-result\">Fechar</button></div>`;
 
                     pixResultEl.innerHTML = html;
                     pixResultEl.style.display = 'block';
