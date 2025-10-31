@@ -247,6 +247,33 @@
         .search-btn:hover {
             background: #5f199b;
         }
+        .mic-btn {
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            background: var(--nubank-gradient);
+            color: #fff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+        }
+        .mic-btn:hover {
+            background: #5f199b;
+        }
+        .mic-btn.recording {
+            background: #ff4444;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
         .videos-list {
             width: 100%;
             margin: 0 auto;
@@ -479,6 +506,7 @@
         <div class="search-section" id="search-section" style="display:none;">
             <div class="search-bar">
                 <input type="text" id="search-input" placeholder="Buscar músicas..." />
+                <button class="mic-btn" id="mic-btn" title="Comando de voz">🎤</button>
                 <button class="search-btn" id="search-btn">Buscar</button>
             </div>
         </div>
@@ -509,6 +537,7 @@
         let usuarioLogado = '';
         let senhaLogada = '';
         let html5QrCode = null;
+        let recognition = null;
 
         const loginForm = document.getElementById('login-form');
     const loginContainer = document.getElementById('login-container');
@@ -528,6 +557,7 @@
         const searchSection = document.getElementById('search-section');
         const searchInput = document.getElementById('search-input');
         const searchBtn = document.getElementById('search-btn');
+        const micBtn = document.getElementById('mic-btn');
         const videosList = document.getElementById('videos-list');
     const decCreditBtn = document.getElementById('dec-credit');
     const incCreditBtn = document.getElementById('inc-credit');
@@ -541,6 +571,51 @@
     const fieldCpf = document.getElementById('field-cpf');
     const fieldEmail = document.getElementById('field-email');
     const fieldTelefone = document.getElementById('field-telefone');
+
+        // Inicializar reconhecimento de voz
+        function initSpeechRecognition() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                micBtn.style.display = 'none';
+                return;
+            }
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'pt-BR';
+            recognition.onstart = () => {
+                micBtn.classList.add('recording');
+                micBtn.textContent = '🔴';
+            };
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                searchInput.value = transcript;
+                searchBtn.click(); // Dispara a busca automaticamente
+            };
+            recognition.onerror = (event) => {
+                console.error('Erro no reconhecimento de voz:', event.error);
+                micBtn.classList.remove('recording');
+                micBtn.textContent = '🎤';
+                if (event.error !== 'aborted') {
+                    alert('Erro no reconhecimento de voz. Tente novamente.');
+                }
+            };
+            recognition.onend = () => {
+                micBtn.classList.remove('recording');
+                micBtn.textContent = '🎤';
+            };
+        }
+
+        // Event listener para o botão de microfone
+        if (micBtn) {
+            micBtn.addEventListener('click', () => {
+                if (recognition) {
+                    recognition.start();
+                } else {
+                    alert('Reconhecimento de voz não suportado neste navegador.');
+                }
+            });
+        }
 
         // LOGIN
         loginForm.addEventListener('submit', async function(e) {
@@ -596,6 +671,8 @@
                         revealSensitive(revealed);
                     });
                 }
+                // Inicializa reconhecimento de voz após login
+                initSpeechRecognition();
 
             } catch (err) {
                 loginError.textContent = err.message || 'Erro no login.';
