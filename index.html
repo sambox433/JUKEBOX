@@ -159,6 +159,24 @@
             background: var(--nubank-purple);
             color: #fff;
         }
+        .upload-qr-btn {
+            width: 100%;
+            margin-top: 8px;
+            padding: 12px 0;
+            border: none;
+            border-radius: 10px;
+            background: #fff;
+            color: var(--nubank-purple);
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #820ad122;
+            transition: background 0.2s, color 0.2s;
+        }
+        .upload-qr-btn:hover {
+            background: var(--nubank-purple);
+            color: #fff;
+        }
         .credit-btn {
             background: #fff;
             color: var(--nubank-purple);
@@ -445,7 +463,9 @@
                 </div>
             </div>
 
-            <button class="scan-btn" id="scan-btn">Escanear Ponto</button>
+            <button class="scan-btn" id="scan-btn">Escanear Ponto (Câmera)</button>
+            <button class="upload-qr-btn" id="upload-qr-btn">Carregar Imagem de QR Code</button>
+            <input type="file" id="qr-file-input" accept="image/*" style="display: none;">
             <div class="qr-result" id="qr-result"></div>
 
             <!-- Resultado do PIX -->
@@ -500,6 +520,8 @@
         const userAvatar = document.getElementById('user-avatar');
         const saldoValor = document.getElementById('saldo-valor');
         const scanBtn = document.getElementById('scan-btn');
+        const uploadQrBtn = document.getElementById('upload-qr-btn');
+        const qrFileInput = document.getElementById('qr-file-input');
         const qrResult = document.getElementById('qr-result');
         const qrReader = document.getElementById('qr-reader');
         const sideMenu = document.getElementById('side-menu');
@@ -681,6 +703,15 @@
             return readerDiv.id;
         }
 
+        // Configuração aprimorada para maior precisão: qrbox quadrado maior, aspect ratio 1:1, FPS mais alto, flip desabilitado para evitar inversões desnecessárias
+        const qrConfig = {
+            fps: 15,
+            qrbox: { width: 300, height: 300 },
+            aspectRatio: 1.0,
+            disableFlip: false,
+            rememberLastUsedCamera: true
+        };
+
         scanBtn.addEventListener('click', async function() {
             qrResult.style.display = 'none';
             // if already running, stop
@@ -700,7 +731,7 @@
             html5QrCode = new Html5Qrcode(readerId);
             html5QrCode.start(
                 { facingMode: 'environment' },
-                { fps: 10, qrbox: { width: 260, height: 160 } },
+                qrConfig,
                 qrCodeMessage => {
                     qrResult.style.display = 'block';
                     qrResult.textContent = 'Valor escaneado: ' + qrCodeMessage;
@@ -718,6 +749,37 @@
                 const ov = document.getElementById('qr-overlay');
                 if (ov) ov.remove();
             });
+        });
+
+        // Suporte para upload de imagem de QR Code para escaneamento estático (útil para testar com imagens salvas)
+        uploadQrBtn.addEventListener('click', () => {
+            qrFileInput.click();
+        });
+
+        qrFileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            qrResult.style.display = 'none';
+            e.target.value = ''; // Reset para permitir reenvio do mesmo arquivo
+
+            try {
+                if (!html5QrCode) {
+                    html5QrCode = new Html5Qrcode('qr-reader'); // Usa um div temporário para scanFile
+                    document.getElementById('qr-reader').style.display = 'block'; // Temporário, mas não visível
+                }
+
+                const decodedText = await html5QrCode.scanFile(file, true);
+                qrResult.style.display = 'block';
+                qrResult.textContent = 'Valor escaneado da imagem: ' + decodedText;
+                const idPontoEl = document.getElementById('id-ponto');
+                if (idPontoEl) idPontoEl.textContent = decodedText;
+                document.getElementById('qr-reader').style.display = 'none'; // Esconde após uso
+
+            } catch (err) {
+                qrResult.style.display = 'block';
+                qrResult.innerHTML = `<span style="color:#ff1744;">Erro ao escanear imagem: ${err}</span><br><small>Dica: Certifique-se de que a imagem tem bom contraste e o QR Code está claro. Tente imagens com fundo neutro.</small>`;
+            }
         });
 
         async function pararLeitorQR() {
