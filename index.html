@@ -1015,7 +1015,7 @@
                 try {
                     const musicTitle = overlay.dataset.musicTitle;
                     const youtubeId = overlay.dataset.youtubeId;
-                    const musica = `${musicTitle}*${youtubeId}`;
+                    const musica = `(TITULO : ${musicTitle} ID : ${youtubeId})`;
 
                     const url = `${GAS_URL}?rota=/adicionar_musica&ponto_id=${encodeURIComponent(ponto)}&nome_cliente=${encodeURIComponent(usuarioLogado)}&senha_cliente=${encodeURIComponent(senhaLogada)}&musica=${encodeURIComponent(musica)}`;
 
