@@ -538,6 +538,7 @@
         let senhaLogada = '';
         let html5QrCode = null;
         let recognition = null;
+        let isRecording = false;
 
         const loginForm = document.getElementById('login-form');
     const loginContainer = document.getElementById('login-container');
@@ -584,6 +585,7 @@
             recognition.interimResults = false;
             recognition.lang = 'pt-BR';
             recognition.onstart = () => {
+                isRecording = true;
                 micBtn.classList.add('recording');
                 micBtn.textContent = '🔴';
             };
@@ -594,6 +596,7 @@
             };
             recognition.onerror = (event) => {
                 console.error('Erro no reconhecimento de voz:', event.error);
+                isRecording = false;
                 micBtn.classList.remove('recording');
                 micBtn.textContent = '🎤';
                 if (event.error !== 'aborted') {
@@ -601,18 +604,23 @@
                 }
             };
             recognition.onend = () => {
+                isRecording = false;
                 micBtn.classList.remove('recording');
                 micBtn.textContent = '🎤';
             };
         }
 
-        // Event listener para o botão de microfone
+        // Event listener para o botão de microfone (toggle)
         if (micBtn) {
             micBtn.addEventListener('click', () => {
-                if (recognition) {
-                    recognition.start();
-                } else {
+                if (!recognition) {
                     alert('Reconhecimento de voz não suportado neste navegador.');
+                    return;
+                }
+                if (isRecording) {
+                    recognition.stop();
+                } else {
+                    recognition.start();
                 }
             });
         }
