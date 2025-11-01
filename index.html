@@ -159,24 +159,6 @@
             background: var(--nubank-purple);
             color: #fff;
         }
-        .upload-qr-btn {
-            width: 100%;
-            margin-top: 8px;
-            padding: 12px 0;
-            border: none;
-            border-radius: 10px;
-            background: #fff;
-            color: var(--nubank-purple);
-            font-size: 1.05rem;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 2px 8px #820ad122;
-            transition: background 0.2s, color 0.2s;
-        }
-        .upload-qr-btn:hover {
-            background: var(--nubank-purple);
-            color: #fff;
-        }
         .credit-btn {
             background: #fff;
             color: var(--nubank-purple);
@@ -246,33 +228,6 @@
         }
         .search-btn:hover {
             background: #5f199b;
-        }
-        .mic-btn {
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            background: var(--nubank-gradient);
-            color: #fff;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 48px;
-            height: 48px;
-        }
-        .mic-btn:hover {
-            background: #5f199b;
-        }
-        .mic-btn.recording {
-            background: #ff4444;
-            animation: pulse 1s infinite;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
         }
         .videos-list {
             width: 100%;
@@ -490,9 +445,7 @@
                 </div>
             </div>
 
-            <button class="scan-btn" id="scan-btn">Escanear Ponto (Câmera)</button>
-            <button class="upload-qr-btn" id="upload-qr-btn">Carregar Imagem de QR Code</button>
-            <input type="file" id="qr-file-input" accept="image/*" style="display: none;">
+            <button class="scan-btn" id="scan-btn">Escanear Ponto</button>
             <div class="qr-result" id="qr-result"></div>
 
             <!-- Resultado do PIX -->
@@ -505,8 +458,7 @@
 
         <div class="search-section" id="search-section" style="display:none;">
             <div class="search-bar">
-                <input type="text" id="search-input" placeholder="Buscar músicas..." />
-                <button class="mic-btn" id="mic-btn" title="Comando de voz">🎤</button>
+                <input type="text" id="search-input" placeholder="Buscar cantores..." />
                 <button class="search-btn" id="search-btn">Buscar</button>
             </div>
         </div>
@@ -530,15 +482,19 @@
     </div>
 
     <script>
-    // URL base do seu Web App (sem query params)
-    // Exemplo de uso: ?rota=/consultar_cliente&nome=usuario&senha=senha
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxuBRlhNIPHSh4xDJB3-2uzPdjXgiCih_o2qSpWRe-PERRw8Z6a1SsziKfBUCJh0bTi-w/exec';
+    // URL base do seu Web App para adicionar (sem query params)
+    const ADD_API = 'https://script.google.com/macros/s/AKfycbxuBRlhNIPHSh4xDJB3-2uzPdjXgiCih_o2qSpWRe-PERRw8Z6a1SsziKfBUCJh0bTi-w/exec';
+    // URL para listar cantores e músicas
+    const LIST_API = 'https://script.google.com/macros/s/AKfycbwTwcc3h03VglBZQ3d_1iveB-WOzxZ3fT060_iljuP1nqtgsCsSg0ouwYgw4xo3fOJ4/exec';
 
         let usuarioLogado = '';
         let senhaLogada = '';
         let html5QrCode = null;
-        let recognition = null;
-        let isRecording = false;
+        let currentPage = 1;
+        let currentBusca = '';
+        let totalPaginas = 1;
+        let currentView = 'cantores';
+        let currentCantor = null;
 
         const loginForm = document.getElementById('login-form');
     const loginContainer = document.getElementById('login-container');
@@ -550,15 +506,12 @@
         const userAvatar = document.getElementById('user-avatar');
         const saldoValor = document.getElementById('saldo-valor');
         const scanBtn = document.getElementById('scan-btn');
-        const uploadQrBtn = document.getElementById('upload-qr-btn');
-        const qrFileInput = document.getElementById('qr-file-input');
         const qrResult = document.getElementById('qr-result');
         const qrReader = document.getElementById('qr-reader');
         const sideMenu = document.getElementById('side-menu');
         const searchSection = document.getElementById('search-section');
         const searchInput = document.getElementById('search-input');
         const searchBtn = document.getElementById('search-btn');
-        const micBtn = document.getElementById('mic-btn');
         const videosList = document.getElementById('videos-list');
     const decCreditBtn = document.getElementById('dec-credit');
     const incCreditBtn = document.getElementById('inc-credit');
@@ -572,58 +525,6 @@
     const fieldCpf = document.getElementById('field-cpf');
     const fieldEmail = document.getElementById('field-email');
     const fieldTelefone = document.getElementById('field-telefone');
-
-        // Inicializar reconhecimento de voz
-        function initSpeechRecognition() {
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                micBtn.style.display = 'none';
-                return;
-            }
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.lang = 'pt-BR';
-            recognition.onstart = () => {
-                isRecording = true;
-                micBtn.classList.add('recording');
-                micBtn.textContent = '🔴';
-            };
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                searchInput.value = transcript;
-                searchBtn.click(); // Dispara a busca automaticamente
-            };
-            recognition.onerror = (event) => {
-                console.error('Erro no reconhecimento de voz:', event.error);
-                isRecording = false;
-                micBtn.classList.remove('recording');
-                micBtn.textContent = '🎤';
-                if (event.error !== 'aborted') {
-                    alert('Erro no reconhecimento de voz. Tente novamente.');
-                }
-            };
-            recognition.onend = () => {
-                isRecording = false;
-                micBtn.classList.remove('recording');
-                micBtn.textContent = '🎤';
-            };
-        }
-
-        // Event listener para o botão de microfone (toggle)
-        if (micBtn) {
-            micBtn.addEventListener('click', () => {
-                if (!recognition) {
-                    alert('Reconhecimento de voz não suportado neste navegador.');
-                    return;
-                }
-                if (isRecording) {
-                    recognition.stop();
-                } else {
-                    recognition.start();
-                }
-            });
-        }
 
         // LOGIN
         loginForm.addEventListener('submit', async function(e) {
@@ -640,7 +541,7 @@
 
             try {
                 // Monta a URL conforme o exemplo: ?rota=/consultar_cliente&nome=...&senha=...
-                const url = `${GAS_URL}?rota=/consultar_cliente&nome=${encodeURIComponent(username)}&senha=${encodeURIComponent(password)}`;
+                const url = `${ADD_API}?rota=/consultar_cliente&nome=${encodeURIComponent(username)}&senha=${encodeURIComponent(password)}`;
                 const response = await fetch(url);
 
                 // Exige status HTTP 200 antes de seguir
@@ -665,8 +566,8 @@
                 if (sidebar) sidebar.style.display = 'flex';
                 mainContent.style.display = 'flex';
                 searchSection.style.display = 'flex';
-                // inicia com pesquisa por pagodes conforme solicitado
-                buscarVideos('pagodes');
+                // inicia com listagem de cantores
+                buscarCantores(1, '');
 
                 // inicializa controles de PIX/creditos
                 initCreditControls();
@@ -679,8 +580,6 @@
                         revealSensitive(revealed);
                     });
                 }
-                // Inicializa reconhecimento de voz após login
-                initSpeechRecognition();
 
             } catch (err) {
                 loginError.textContent = err.message || 'Erro no login.';
@@ -788,15 +687,6 @@
             return readerDiv.id;
         }
 
-        // Configuração aprimorada para maior precisão: qrbox quadrado maior, aspect ratio 1:1, FPS mais alto, flip desabilitado para evitar inversões desnecessárias
-        const qrConfig = {
-            fps: 15,
-            qrbox: { width: 300, height: 300 },
-            aspectRatio: 1.0,
-            disableFlip: false,
-            rememberLastUsedCamera: true
-        };
-
         scanBtn.addEventListener('click', async function() {
             qrResult.style.display = 'none';
             // if already running, stop
@@ -816,7 +706,7 @@
             html5QrCode = new Html5Qrcode(readerId);
             html5QrCode.start(
                 { facingMode: 'environment' },
-                qrConfig,
+                { fps: 10, qrbox: { width: 260, height: 160 } },
                 qrCodeMessage => {
                     qrResult.style.display = 'block';
                     qrResult.textContent = 'Valor escaneado: ' + qrCodeMessage;
@@ -836,37 +726,6 @@
             });
         });
 
-        // Suporte para upload de imagem de QR Code para escaneamento estático (útil para testar com imagens salvas)
-        uploadQrBtn.addEventListener('click', () => {
-            qrFileInput.click();
-        });
-
-        qrFileInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            qrResult.style.display = 'none';
-            e.target.value = ''; // Reset para permitir reenvio do mesmo arquivo
-
-            try {
-                if (!html5QrCode) {
-                    html5QrCode = new Html5Qrcode('qr-reader'); // Usa um div temporário para scanFile
-                    document.getElementById('qr-reader').style.display = 'block'; // Temporário, mas não visível
-                }
-
-                const decodedText = await html5QrCode.scanFile(file, true);
-                qrResult.style.display = 'block';
-                qrResult.textContent = 'Valor escaneado da imagem: ' + decodedText;
-                const idPontoEl = document.getElementById('id-ponto');
-                if (idPontoEl) idPontoEl.textContent = decodedText;
-                document.getElementById('qr-reader').style.display = 'none'; // Esconde após uso
-
-            } catch (err) {
-                qrResult.style.display = 'block';
-                qrResult.innerHTML = `<span style="color:#ff1744;">Erro ao escanear imagem: ${err}</span><br><small>Dica: Certifique-se de que a imagem tem bom contraste e o QR Code está claro. Tente imagens com fundo neutro.</small>`;
-            }
-        });
-
         async function pararLeitorQR() {
             try {
                 if (html5QrCode) {
@@ -883,10 +742,11 @@
             if (qrReader) qrReader.style.display = 'none';
         }
 
-        // BUSCA DE VÍDEOS
+        // BUSCA DE CANTORES
         searchBtn.addEventListener('click', () => {
             const termo = searchInput.value.trim();
-            buscarVideos(termo || ' ');
+            currentView = 'cantores';
+            buscarCantores(1, termo);
         });
 
         searchInput.addEventListener('keydown', e => {
@@ -896,86 +756,149 @@
             }
         });
 
-        async function buscarVideos(termo) {
-            const q = (termo && termo.trim()) || ' ';
+        async function buscarCantores(page = 1, busca = '') {
+            if (page < 1) page = 1;
+            currentPage = page;
+            currentBusca = busca;
             videosList.innerHTML = '<div style="color:#820ad1;font-weight:600;margin-top:24px;">Buscando...</div>';
 
             try {
-                // usa rota /buscar_videos e envia nome, senha e termo (q)
-                const url = `${GAS_URL}?rota=/buscar_videos&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&q=${encodeURIComponent(q)}`;
+                let url = `${LIST_API}?rota=/listar_cantores&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&pagina=${page}`;
+                if (busca) url += `&busca=${encodeURIComponent(busca)}`;
                 const response = await fetch(url);
                 const data = await response.json();
 
                 if (!response.ok || data.error) {
-                    throw new Error(data.error || 'Erro ao buscar vídeos');
+                    throw new Error(data.error || 'Erro ao buscar cantores');
                 }
 
-                renderizarVideos(data);
+                totalPaginas = data.total_paginas || 1;
+                renderizarCantores(data.cantores || []);
 
             } catch (err) {
                 videosList.innerHTML = `<div style="color:#ff1744;font-weight:600;margin-top:24px;">${err.message}</div>`;
             }
         }
 
-        function renderizarVideos(videos) {
-            let lista = Array.isArray(videos) ? videos : (videos.results || []);
-            if (lista.length === 0) {
+        function renderizarCantores(cantores) {
+            if (cantores.length === 0) {
+                videosList.innerHTML = '<div style="color:#888;font-weight:600;margin-top:24px;">Nenhum cantor encontrado.</div>';
+                return;
+            }
+
+            videosList.innerHTML = '';
+            cantores.forEach(cantor => {
+                const card = document.createElement('div');
+                card.className = 'video-card';
+                card.innerHTML = `
+                    <img class="video-thumb" src="${cantor.capa || 'https://via.placeholder.com/210x120?text=Sem+Imagem'}" alt="${cantor.nome}">
+                    <div class="video-title">${cantor.nome || 'Sem nome'}</div>
+                    <div class="video-id">ID: ${cantor.id || '-'}</div>
+                `;
+                card.addEventListener('click', () => carregarMusicas(cantor.id, cantor.nome));
+                videosList.appendChild(card);
+            });
+            addPagination();
+        }
+
+        function addPagination() {
+            const pagDiv = document.createElement('div');
+            pagDiv.style.display = 'flex';
+            pagDiv.style.justifyContent = 'center';
+            pagDiv.style.gap = '16px';
+            pagDiv.style.marginTop = '24px';
+
+            const btnPrev = document.createElement('button');
+            btnPrev.className = 'search-btn';
+            btnPrev.textContent = 'Retorna';
+            btnPrev.disabled = currentPage === 1;
+            btnPrev.addEventListener('click', () => {
+                if (currentPage > 1) buscarCantores(currentPage - 1, currentBusca);
+            });
+
+            const btnNext = document.createElement('button');
+            btnNext.className = 'search-btn';
+            btnNext.textContent = 'Proxima';
+            btnNext.disabled = currentPage >= totalPaginas;
+            btnNext.addEventListener('click', () => {
+                if (currentPage < totalPaginas) buscarCantores(currentPage + 1, currentBusca);
+            });
+
+            pagDiv.appendChild(btnPrev);
+            pagDiv.appendChild(btnNext);
+            videosList.appendChild(pagDiv);
+        }
+
+        async function carregarMusicas(id, nomeCantor) {
+            currentView = 'musicas';
+            currentCantor = { id, nome: nomeCantor };
+            videosList.innerHTML = '<div style="color:#820ad1;font-weight:600;margin-top:24px;">Carregando músicas...</div>';
+
+            try {
+                const url = `${LIST_API}?rota=/listar_musicas&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&id=${encodeURIComponent(id)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!response.ok || data.error) {
+                    throw new Error(data.error || 'Erro ao carregar músicas');
+                }
+
+                renderizarMusicas(data.musicas || [], data.cantor || nomeCantor);
+
+            } catch (err) {
+                videosList.innerHTML = `<div style="color:#ff1744;font-weight:600;margin-top:24px;">${err.message}</div>`;
+            }
+        }
+
+        function renderizarMusicas(musicas, cantor) {
+            if (musicas.length === 0) {
                 videosList.innerHTML = '<div style="color:#888;font-weight:600;margin-top:24px;">Nenhuma música encontrada.</div>';
                 return;
             }
 
             videosList.innerHTML = '';
-            lista.forEach(video => {
+            const backDiv = document.createElement('div');
+            backDiv.style.display = 'flex';
+            backDiv.style.justifyContent = 'center';
+            backDiv.style.marginBottom = '16px';
+            const backBtn = document.createElement('button');
+            backBtn.className = 'search-btn';
+            backBtn.textContent = 'Voltar aos Cantores';
+            backBtn.addEventListener('click', () => {
+                currentView = 'cantores';
+                buscarCantores(currentPage, currentBusca);
+            });
+            backDiv.appendChild(backBtn);
+            videosList.appendChild(backDiv);
+
+            const titleDiv = document.createElement('div');
+            titleDiv.style.fontSize = '1.2rem';
+            titleDiv.style.fontWeight = '700';
+            titleDiv.style.margin = '12px 0';
+            titleDiv.textContent = `Músicas de ${cantor}`;
+            videosList.appendChild(titleDiv);
+
+            musicas.forEach(musica => {
                 const card = document.createElement('div');
                 card.className = 'video-card';
+                card.style.height = 'auto';
                 card.innerHTML = `
-                    <img class="video-thumb" src="${video.thumbnail || video.imagem || 'https://via.placeholder.com/210x120?text=Sem+Imagem'}" alt="Thumb">
-                    <div class="video-title">${video.title || video.titulo || 'Sem título'}</div>
-                    <div class="video-id">ID: ${video.id || '-'}</div>
-                    <div class="video-id" style="font-size:0.95em;color:#5f199b;">${video.author ? 'Cantor: ' + video.author : ''}</div>
+                    <div class="video-title">${musica.nome || 'Sem nome'}</div>
                 `;
-                        card.addEventListener('click', () => showCardModal(video, card));
+                card.addEventListener('click', () => showCardModal(musica.nome, `${currentCantor.id} - ${musica.nome}`));
                 videosList.appendChild(card);
             });
         }
 
-                // util: extrai um possível YouTube id de vários formatos de objeto/URL
-                function getVideoId(video) {
-                    if (!video) return '';
-                    // caso id seja um objeto do tipo { videoId: '...' }
-                    if (typeof video.id === 'object' && video.id !== null) {
-                        if (video.id.videoId) return String(video.id.videoId);
-                        if (video.id['#text']) return String(video.id['#text']);
-                    }
-                    // propriedades comuns
-                    if (video.videoId) return String(video.videoId);
-                    if (video.ytId) return String(video.ytId);
-                    if (video.video_id) return String(video.video_id);
-                    if (typeof video.id === 'string') {
-                        // se for uma URL do youtube, extrai o id
-                        const s = video.id;
-                        const m = s.match(/(?:v=|\/v\/|youtu\.be\/|embed\/)([A-Za-z0-9_-]{6,})/);
-                        if (m && m[1]) return m[1];
-                        return s;
-                    }
-                    // tenta extrair de uma eventual url
-                    if (video.url && typeof video.url === 'string') {
-                        const m2 = video.url.match(/(?:v=|\/v\/|youtu\.be\/|embed\/)([A-Za-z0-9_-]{6,})/);
-                        if (m2 && m2[1]) return m2[1];
-                    }
-                    return '';
-                }
-
-        function showCardModal(video, card) {
+        function showCardModal(musicaNome, musicaStr) {
             const existingOverlay = document.querySelector('.fullscreen-modal');
             if (existingOverlay) existingOverlay.remove();
 
             const overlay = document.createElement('div');
             overlay.className = 'fullscreen-modal';
 
-            const title = escapeHtml(video.title || 'Sem título');
-            const author = escapeHtml(video.author || 'Desconhecido');
-            const youtubeId = escapeHtml(getVideoId(video) || video.id || '');
+            const title = escapeHtml(musicaNome || 'Sem título');
+            const author = escapeHtml(currentCantor.nome || 'Desconhecido');
             const pontoId = document.getElementById('id-ponto')?.textContent.trim() || '0';
 
             overlay.innerHTML = `
@@ -985,7 +908,6 @@
                     </div>
                     <div>Título: <strong>${title}</strong></div>
                     <div>Artista: ${author}</div>
-                    <div style="font-size:0.95rem;color:#666;">YouTube ID: <strong style="color:#222;">${youtubeId}</strong></div>
                     <div class="modal-actions">
                         <button class="scan-btn" id="modal-send">Enviar Música</button>
                         <button class="scan-btn" id="modal-cancel">Cancelar</button>
@@ -994,8 +916,7 @@
                 </div>
             `;
 
-            overlay.dataset.musicTitle = title;
-            overlay.dataset.youtubeId = youtubeId;
+            overlay.dataset.musicaStr = musicaStr;
             document.body.appendChild(overlay);
 
             const btnCancel = overlay.querySelector('#modal-cancel');
@@ -1013,11 +934,9 @@
                 btnSend.style.opacity = '0.7';
 
                 try {
-                    const musicTitle = overlay.dataset.musicTitle;
-                    const youtubeId = overlay.dataset.youtubeId;
-                    const musica = `(TITULO : ${musicTitle} ID : ${youtubeId})`;
+                    const musica = overlay.dataset.musicaStr;
 
-                    const url = `${GAS_URL}?rota=/adicionar_musica&ponto_id=${encodeURIComponent(ponto)}&nome_cliente=${encodeURIComponent(usuarioLogado)}&senha_cliente=${encodeURIComponent(senhaLogada)}&musica=${encodeURIComponent(musica)}`;
+                    const url = `${ADD_API}?rota=/adicionar_musica&ponto_id=${encodeURIComponent(ponto)}&nome_cliente=${encodeURIComponent(usuarioLogado)}&senha_cliente=${encodeURIComponent(senhaLogada)}&musica=${encodeURIComponent(musica)}`;
 
                     const resp = await fetch(url);
                     const data = await resp.json();
@@ -1029,7 +948,7 @@
                         
                         // Aguarda 3 segundos e atualiza o saldo
                         setTimeout(async () => {
-                            await updateBalance(true); // true indica que é após envio de música (pode ajustar mensagem se quiser)
+                            await updateBalance(true); // true indica que é após envio de música
                             overlay.remove();
                         }, 3000);
                     } else {
@@ -1064,7 +983,7 @@
                 }
 
                 // 1) chama rota /verificar_pagamentos (sem params conforme solicitado)
-                const checkUrl = `${GAS_URL}?rota=/verificar_pagamentos`;
+                const checkUrl = `${ADD_API}?rota=/verificar_pagamentos`;
                 const checkResp = await fetch(checkUrl);
                 if (checkResp.status !== 200) {
                     const t = await checkResp.text().catch(() => checkResp.statusText || 'Erro no servidor');
@@ -1075,7 +994,7 @@
                 await new Promise(r => setTimeout(r, 1000));
 
                 // 2) consulta cliente para atualizar saldo
-                const url = `${GAS_URL}?rota=/consultar_cliente&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}`;
+                const url = `${ADD_API}?rota=/consultar_cliente&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}`;
                 const resp = await fetch(url);
                 if (resp.status !== 200) {
                     const t = await resp.text().catch(() => resp.statusText || 'Erro no servidor');
@@ -1143,7 +1062,7 @@
                 pixResultEl.style.display = 'none';
                 const creditos = credits;
                 try {
-                    const url = `${GAS_URL}?rota=/gerar_pix&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&creditos=${encodeURIComponent(creditos)}`;
+                    const url = `${ADD_API}?rota=/gerar_pix&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&creditos=${encodeURIComponent(creditos)}`;
                     const resp = await fetch(url);
                     if (resp.status !== 200) {
                         const t = await resp.text().catch(() => resp.statusText || 'Erro no servidor');
