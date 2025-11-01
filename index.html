@@ -885,7 +885,7 @@
                 card.innerHTML = `
                     <div class="video-title">${musica.nome || 'Sem nome'}</div>
                 `;
-                card.addEventListener('click', () => showCardModal(musica.nome, `${currentCantor.id} - ${musica.nome}`));
+                card.addEventListener('click', () => showCardModal(musica.nome, `${musica.nome}*${musica.url}`));
                 videosList.appendChild(card);
             });
         }
