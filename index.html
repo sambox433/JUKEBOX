@@ -843,15 +843,16 @@
                     throw new Error(data.error || 'Erro ao carregar músicas');
                 }
 
-                renderizarMusicas(data.musicas || [], data.cantor || nomeCantor);
+                renderizarMusicas(data.musicas || [], data.videos || [], data.cantor || nomeCantor);
 
             } catch (err) {
                 videosList.innerHTML = `<div style="color:#ff1744;font-weight:600;margin-top:24px;">${err.message}</div>`;
             }
         }
 
-        function renderizarMusicas(musicas, cantor) {
-            if (musicas.length === 0) {
+        function renderizarMusicas(musicas, videos, cantor) {
+            const itens = [...musicas, ...videos];
+            if (itens.length === 0) {
                 videosList.innerHTML = '<div style="color:#888;font-weight:600;margin-top:24px;">Nenhuma música encontrada.</div>';
                 return;
             }
@@ -878,14 +879,14 @@
             titleDiv.textContent = `Músicas de ${cantor}`;
             videosList.appendChild(titleDiv);
 
-            musicas.forEach(musica => {
+            itens.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'video-card';
                 card.style.height = 'auto';
                 card.innerHTML = `
-                    <div class="video-title">${musica.nome || 'Sem nome'}</div>
+                    <div class="video-title">${item.nome || 'Sem nome'}</div>
                 `;
-                card.addEventListener('click', () => showCardModal(musica.nome, `${musica.nome}*${musica.url}`));
+                card.addEventListener('click', () => showCardModal(item.nome, `${item.nome}*${item.url}`));
                 videosList.appendChild(card);
             });
         }
