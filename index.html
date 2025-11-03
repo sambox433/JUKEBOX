@@ -135,7 +135,7 @@
             opacity: 0.9;
         }
         .saldo-valor {
-            color: #fff;
+            color: #4caf50;
             font-size: 2.1rem;
             font-weight: 700;
             letter-spacing: 1px;
@@ -424,7 +424,7 @@
             </div>
         </div>
         <div class="saldo-box">
-            <div class="saldo-label">Saldo em Créditos</div>
+            <div class="saldo-label">SALDO DE CRÉDITOS</div>
             <div class="saldo-valor" id="saldo-valor">0</div>
             <div class="id-ponto">ID do Ponto: <span id="id-ponto">0</span></div>
 
@@ -483,9 +483,9 @@
 
     <script>
     // URL base do seu Web App para adicionar (sem query params)
-    const ADD_API = 'https://script.google.com/macros/s/AKfycbxp7TZ1POaAtqE3LfTxUquBPh0sCXRTRsuVdUtoeQTKlGgP-KXCnOZAl6ryUXC0FHaz/exec';
+    const ADD_API = 'https://script.google.com/macros/s/AKfycbxuBRlhNIPHSh4xDJB3-2uzPdjXgiCih_o2qSpWRe-PERRw8Z6a1SsziKfBUCJh0bTi-w/exec';
     // URL para listar cantores e músicas
-    const LIST_API = 'https://script.google.com/macros/s/AKfycbxp7TZ1POaAtqE3LfTxUquBPh0sCXRTRsuVdUtoeQTKlGgP-KXCnOZAl6ryUXC0FHaz/exec';
+    const LIST_API = 'https://script.google.com/macros/s/AKfycbwTwcc3h03VglBZQ3d_1d_1iveB-WOzxZ3fT060_iljuP1nqtgsCsSg0ouwYgw4xo3fOJ4/exec';
 
         let usuarioLogado = '';
         let senhaLogada = '';
@@ -591,7 +591,7 @@
             userAvatar.textContent = (data.nome && data.nome.length > 0) ? data.nome[0].toUpperCase() : '?';
             userName.textContent = data.nome || 'Não informado';
             userId.textContent = 'ID: ' + (data.usuario_id || 'Não informado');
-            saldoValor.textContent = data.creditos !== undefined ? data.creditos : '0';
+            saldoValor.textContent = (data.creditos !== undefined ? data.creditos : '0') + ' 💰';
 
             if (sideMenu) {
                 sideMenu.innerHTML = '';
@@ -843,16 +843,15 @@
                     throw new Error(data.error || 'Erro ao carregar músicas');
                 }
 
-                renderizarMusicas(data.musicas || [], data.videos || [], data.cantor || nomeCantor);
+                renderizarMusicas(data.musicas || [], data.cantor || nomeCantor);
 
             } catch (err) {
                 videosList.innerHTML = `<div style="color:#ff1744;font-weight:600;margin-top:24px;">${err.message}</div>`;
             }
         }
 
-        function renderizarMusicas(musicas, videos, cantor) {
-            const itens = [...musicas, ...videos];
-            if (itens.length === 0) {
+        function renderizarMusicas(musicas, cantor) {
+            if (musicas.length === 0) {
                 videosList.innerHTML = '<div style="color:#888;font-weight:600;margin-top:24px;">Nenhuma música encontrada.</div>';
                 return;
             }
@@ -879,14 +878,18 @@
             titleDiv.textContent = `Músicas de ${cantor}`;
             videosList.appendChild(titleDiv);
 
-            itens.forEach(item => {
+            musicas.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'video-card';
                 card.style.height = 'auto';
                 card.innerHTML = `
                     <div class="video-title">${item.nome || 'Sem nome'}</div>
                 `;
-                card.addEventListener('click', () => showCardModal(item.nome, `${item.nome}*${item.url}`));
+                let type = 'mp3';
+                if (item.url.toLowerCase().endsWith('.mp4')) {
+                    type = 'mp4';
+                }
+                card.addEventListener('click', () => showCardModal(item.nome, JSON.stringify({titulo: item.nome, [type]: item.url})));
                 videosList.appendChild(card);
             });
         }
@@ -943,9 +946,9 @@
                     const data = await resp.json();
 
                     modalMsg.style.display = 'block';
-                    if (data.message || data.status === 'sucesso') {
+                    if (data.status === 'sucesso') {
                         modalMsg.style.color = '#2e7d32';
-                        modalMsg.textContent = data.message || "Música enviada com sucesso!";
+                        modalMsg.textContent = "Música enviada com sucesso!";
                         
                         // Aguarda 3 segundos e atualiza o saldo
                         setTimeout(async () => {
@@ -1008,12 +1011,12 @@
                 mostrarMenuLateral(data);
                 
                 // Mostra mensagem de sucesso (ajustada se for após música)
-                const message = isAfterMusicSend 
-                    ? `Música enviada! Saldo atualizado: ${data.creditos !== undefined ? data.creditos : '0'} créditos` 
-                    : `Saldo atualizado: ${data.creditos !== undefined ? data.creditos : '0'} créditos`;
-                pixResultEl.style.display = 'block';
-                pixResultEl.innerHTML = `<div style="color:#2e7d32;font-weight:700;">${message}</div>`;
-                setTimeout(() => pixResultEl.style.display = 'none', 2500);
+                if (!isAfterMusicSend) {
+                    const message = `Saldo atualizado: ${data.creditos !== undefined ? data.creditos : '0'} créditos`;
+                    pixResultEl.style.display = 'block';
+                    pixResultEl.innerHTML = `<div style="color:#2e7d32;font-weight:700;">${message}</div>`;
+                    setTimeout(() => pixResultEl.style.display = 'none', 2500);
+                }
 
             } catch (err) {
                 pixResultEl.style.display = 'block';
@@ -1143,4 +1146,3 @@
     </script>
 </body>
 </html>
-
