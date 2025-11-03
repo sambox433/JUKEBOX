@@ -67,20 +67,6 @@
             align-items: center;
             margin-bottom: 36px;
         }
-        .sensitive-toggle {
-            background: transparent;
-            border: none;
-            color: var(--nubank-dark);
-            font-size: 1.05rem;
-            cursor: pointer;
-            margin-left: 8px;
-        }
-        .sensitive-field {
-            color: #555;
-            font-size: 0.95rem;
-            margin-top: 4px;
-        }
-        .masked { filter: blur(4px); letter-spacing: 2px; }
         .user-avatar {
             width: 68px;
             height: 68px;
@@ -107,58 +93,91 @@
             opacity: 0.7;
         }
 
-        /* === CARTÃO DE CRÉDITO ESTILO SALDO === */
+        /* BOTÃO MOSTRAR/OCULTAR DADOS */
+        .show-data-btn {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: 0.2s;
+            backdrop-filter: blur(4px);
+        }
+        .show-data-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        /* CARTÃO ROXO ESTILO NUBANK */
         .saldo-card {
             width: 90%;
             max-width: 380px;
             height: 220px;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            border-radius: 16px;
-            padding: 24px;
+            background: var(--nubank-gradient);
+            border-radius: 18px;
+            padding: 28px 24px;
             margin-bottom: 28px;
             color: #fff;
-            box-shadow: 0 8px 32px rgba(130, 10, 209, 0.3);
+            box-shadow: 0 12px 32px rgba(130, 10, 209, 0.35);
             position: relative;
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            transition: transform 0.2s;
+        }
+        .saldo-card:hover {
+            transform: translateY(-4px) scale(1.02);
         }
         .saldo-card::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            top: -60%;
+            left: -60%;
+            width: 220%;
+            height: 220%;
+            background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%);
             pointer-events: none;
+            animation: shine 6s infinite;
+        }
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(30deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(30deg); }
         }
         .wallet-title {
-            font-size: 1.15rem;
-            font-weight: 600;
+            font-size: 1.3rem;
+            font-weight: 700;
             text-align: center;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
         .credit-line {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 1.9rem;
-            font-weight: 700;
-            color: #4caf50;
-            text-shadow: 0 2px 8px rgba(76,175,80,0.3);
+            gap: 10px;
+            font-size: 2.1rem;
+            font-weight: 800;
+            color: #ffffff;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+        }
+        .credit-line span {
+            font-weight: 800;
+            color: #ffffff;
         }
         .id-ponto {
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-weight: 700;
-            background: rgba(255,255,255,0.1);
-            padding: 6px 12px;
-            border-radius: 8px;
+            background: rgba(255,255,255,0.15);
+            padding: 8px 14px;
+            border-radius: 10px;
             align-self: center;
+            backdrop-filter: blur(4px);
         }
-        /* ===================================== */
 
         .scan-btn {
             width: 100%;
@@ -206,6 +225,8 @@
             box-shadow: 0 2px 8px #820ad122;
             display: none;
         }
+
+        /* BARRA DE BUSCA COM MICROFONE */
         .search-section {
             width: 100%;
             max-width: 480px;
@@ -219,10 +240,11 @@
             width: 100%;
             display: flex;
             gap: 8px;
+            position: relative;
         }
         .search-bar input {
             flex: 1;
-            padding: 12px 10px;
+            padding: 12px 40px 12px 10px;
             border-radius: 8px;
             border: 1.5px solid #e0e0e0;
             font-size: 1.08rem;
@@ -234,6 +256,39 @@
         .search-bar input:focus {
             border: 1.5px solid var(--nubank-purple);
         }
+        .voice-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--nubank-purple);
+            color: #fff;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(130,10,209,0.3);
+            transition: 0.2s;
+        }
+        .voice-btn:hover {
+            background: var(--nubank-dark);
+            transform: translateY(-50%) scale(1.1);
+        }
+        .voice-btn.listening {
+            background: #ff1744;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255,23,68,0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255,23,68,0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,23,68,0); }
+        }
+
         .search-btn {
             padding: 12px 18px;
             border-radius: 8px;
@@ -248,6 +303,7 @@
         .search-btn:hover {
             background: #5f199b;
         }
+
         .videos-list {
             width: 100%;
             margin: 0 auto;
@@ -283,8 +339,6 @@
             margin-bottom: 10px;
             background: #eee;
         }
-        #pix-result pre { max-width: 100%; overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
-        #pix-result img { max-width: 40vw; height: auto; }
         .video-title {
             font-size: 1.08rem;
             font-weight: 700;
@@ -292,6 +346,7 @@
             margin-bottom: 4px;
             text-align: center;
         }
+
         .fullscreen-modal {
             position: fixed;
             inset: 0;
@@ -316,11 +371,7 @@
         .modal-row { display:flex; justify-content:space-between; align-items:center; }
         .modal-actions { display:flex; gap:8px; justify-content:flex-end; }
         .modal-actions .scan-btn { padding:10px 14px; min-width:110px; }
-        .video-id {
-            font-size: 0.93rem;
-            color: #888;
-            margin-bottom: 2px;
-        }
+
         .login-container {
             position: fixed;
             top: 0;
@@ -384,19 +435,11 @@
             margin-top: 12px;
             display: none;
         }
-        @media (max-width: 900px) {
-            .sidebar { width: 100vw; min-height: unset; border-radius: 0; box-shadow: none; padding: 24px 8px; flex-direction: row; }
-            .main-content { padding: 24px 8px; }
-        }
+
         @media (max-width: 600px) {
             .main-content, .saldo-card { width: 100vw; max-width: 100vw; padding: 16px; }
-            .login-container { padding: 24px 8px; }
-            .search-section, .videos-list { max-width: 98vw; }
-            .videos-list { grid-template-columns: 1fr; gap: 15px; padding: 0 5px; }
-            .video-card { width: 100%; }
-            .scan-btn { padding: 10px; font-size: 1rem; }
-            #pix-result img { max-width: 120px; }
-            .video-thumb { height: 200px; }
+            .search-bar input { padding: 12px 44px 12px 10px; }
+            .voice-btn { width: 32px; height: 32px; font-size: 1.1rem; }
         }
         .spinner {
             width: 18px;
@@ -422,19 +465,17 @@
             <div style="display:flex;align-items:center;gap:8px;">
                 <div class="user-id" id="user-id"></div>
             </div>
-            <div id="sensitive-area" style="display:flex;flex-direction:column;align-items:center;margin-top:8px;">
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <button id="toggle-sensitive" class="sensitive-toggle" title="Mostrar/Ocultar dados">Eye</button>
-                </div>
-                <div id="sensitive-fields" style="display:flex;flex-direction:column;align-items:center;margin-top:6px;">
-                    <div class="sensitive-field">CPF: <span class="sensitive-mask" id="field-cpf">•••••••••</span></div>
-                    <div class="sensitive-field">Email: <span class="sensitive-mask" id="field-email">•••••••••</span></div>
-                    <div class="sensitive-field">Contato: <span class="sensitive-mask" id="field-telefone">•••••••••</span></div>
-                </div>
+
+            <button class="show-data-btn" id="show-data-btn">Mostrar dados</button>
+
+            <div id="sensitive-fields" style="display:none;flex-direction:column;align-items:center;margin-top:12px;width:100%;max-width:320px;">
+                <div class="sensitive-field">CPF: <span id="field-cpf">•••••••••</span></div>
+                <div class="sensitive-field">Email: <span id="field-email">•••••••••</span></div>
+                <div class="sensitive-field">Contato: <span id="field-telefone">•••••••••</span></div>
             </div>
         </div>
 
-        <!-- CARTÃO DE CRÉDITO ESTILO -->
+        <!-- CARTÃO ROXO -->
         <div class="saldo-card">
             <div class="wallet-title">Carteira Musical</div>
             <div class="credit-line">
@@ -442,7 +483,6 @@
             </div>
             <div class="id-ponto">ID do Ponto: <span id="id-ponto">0</span></div>
 
-            <!-- Controles de crédito -->
             <div class="credit-controls" style="width:100%;margin-top:16px;">
                 <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;">
                     <div style="display:flex;gap:14px;align-items:center;justify-content:center;">
@@ -461,18 +501,17 @@
 
             <button class="scan-btn" id="scan-btn">Escanear Ponto</button>
             <div class="qr-result" id="qr-result"></div>
-
-            <!-- Resultado do PIX -->
             <div id="pix-result" style="display:none;margin-top:12px;background:#fff;color:#000;padding:12px;border-radius:10px;"></div>
-
             <div id="qr-reader" style="width:100%;margin-top:10px;display:none;"></div>
         </div>
 
+        <!-- BUSCA COM MICROFONE -->
         <div class="search-section" id="search-section" style="display:none;">
             <div class="search-bar">
                 <input type="text" id="search-input" placeholder="Buscar cantores..." />
-                <button class="search-btn" id="search-btn">Buscar</button>
+                <button class="voice-btn" id="voice-btn" title="Falar nome do cantor">Microphone</button>
             </div>
+            <button class="search-btn" id="search-btn">Buscar</button>
         </div>
         <div class="videos-list" id="videos-list"></div>
     </div>
@@ -499,6 +538,7 @@
 
         let usuarioLogado = '', senhaLogada = '', html5QrCode = null;
         let currentPage = 1, currentBusca = '', totalPaginas = 1, currentView = 'cantores', currentCantor = null;
+        let recognition = null;
 
         const loginForm = document.getElementById('login-form');
         const loginContainer = document.getElementById('login-container');
@@ -514,6 +554,7 @@
         const searchSection = document.getElementById('search-section');
         const searchInput = document.getElementById('search-input');
         const searchBtn = document.getElementById('search-btn');
+        const voiceBtn = document.getElementById('voice-btn');
         const videosList = document.getElementById('videos-list');
         const decCreditBtn = document.getElementById('dec-credit');
         const incCreditBtn = document.getElementById('inc-credit');
@@ -523,7 +564,8 @@
         const pixResultEl = document.getElementById('pix-result');
         const refreshBalanceBtn = document.getElementById('refresh-balance');
         const refreshSpinner = document.getElementById('refresh-spinner');
-        const toggleSensitiveBtn = document.getElementById('toggle-sensitive');
+        const showDataBtn = document.getElementById('show-data-btn');
+        const sensitiveFields = document.getElementById('sensitive-fields');
         const fieldCpf = document.getElementById('field-cpf');
         const fieldEmail = document.getElementById('field-email');
         const fieldTelefone = document.getElementById('field-telefone');
@@ -556,15 +598,15 @@
                 searchSection.style.display = 'flex';
                 buscarCantores(1, '');
                 initCreditControls();
+                initVoiceSearch();
 
-                if (toggleSensitiveBtn) {
-                    let revealed = false;
-                    toggleSensitiveBtn.addEventListener('click', () => {
-                        revealed = !revealed;
-                        toggleSensitiveBtn.textContent = revealed ? 'Hidden Eye' : 'Eye';
-                        revealSensitive(revealed);
-                    });
-                }
+                let showing = false;
+                showDataBtn.addEventListener('click', () => {
+                    showing = !showing;
+                    sensitiveFields.style.display = showing ? 'flex' : 'none';
+                    showDataBtn.textContent = showing ? 'Ocultar dados' : 'Mostrar dados';
+                    if (showing) revealSensitive(true);
+                });
 
             } catch (err) {
                 loginError.textContent = err.message || 'Erro no login.';
@@ -578,9 +620,9 @@
             userId.textContent = 'ID: ' + (data.usuario_id || 'Não informado');
             saldoValor.textContent = (data.creditos ?? 0);
 
-            if (fieldCpf) fieldCpf.dataset.value = data.cpf || '';
-            if (fieldEmail) fieldEmail.dataset.value = data.email || '';
-            if (fieldTelefone) fieldTelefone.dataset.value = data.telefone || '';
+            fieldCpf.dataset.value = data.cpf || '';
+            fieldEmail.dataset.value = data.email || '';
+            fieldTelefone.dataset.value = data.telefone || '';
             revealSensitive(false);
         }
 
@@ -589,7 +631,6 @@
                 if (!el) return;
                 const real = el.dataset.value || '';
                 el.textContent = show && real ? real : (real ? '••••••••' : 'Não informado');
-                el.classList.toggle('masked', !show);
             });
         }
 
@@ -655,9 +696,53 @@
             if (qrReader) qrReader.style.display = 'none';
         }
 
-        // BUSCA
-        searchBtn.addEventListener('click', () => { currentView = 'cantores'; buscarCantores(1, searchInput.value.trim()); });
-        searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); searchBtn.click(); } });
+        // BUSCA POR VOZ
+        function initVoiceSearch() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                voiceBtn.style.display = 'none';
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'pt-BR';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            voiceBtn.addEventListener('click', () => {
+                voiceBtn.classList.add('listening');
+                recognition.start();
+            });
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript.trim();
+                searchInput.value = transcript;
+                currentView = 'cantores';
+                buscarCantores(1, transcript);
+            };
+
+            recognition.onerror = () => {
+                voiceBtn.classList.remove('listening');
+                alert('Erro no reconhecimento de voz. Tente novamente.');
+            };
+
+            recognition.onend = () => {
+                voiceBtn.classList.remove('listening');
+            };
+        }
+
+        // BUSCA MANUAL
+        searchBtn.addEventListener('click', () => {
+            const termo = searchInput.value.trim();
+            currentView = 'cantores';
+            buscarCantores(1, termo);
+        });
+        searchInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                searchBtn.click();
+            }
+        });
 
         async function buscarCantores(page = 1, busca = '') {
             currentPage = page; currentBusca = busca;
@@ -777,11 +862,11 @@
                 btnSend.disabled = true; btnCancel.disabled = true; btnSend.style.opacity = '0.7';
                 modalMsg.style.display = 'block';
                 modalMsg.style.color = '#2e7d32';
-                modalMsg.textContent = "Música enviada com sucesso!"; // Mensagem fixa
+                modalMsg.textContent = "Música enviada com sucesso!";
 
                 try {
                     const url = `${ADD_API}?rota=/adicionar_musica&ponto_id=${encodeURIComponent(pontoId)}&nome_cliente=${encodeURIComponent(usuarioLogado)}&senha_cliente=${encodeURIComponent(senhaLogada)}&musica=${encodeURIComponent(musicaStr)}`;
-                    await fetch(url); // Não verifica resposta
+                    await fetch(url);
                     setTimeout(async () => {
                         await updateBalance(true, false);
                         overlay.remove();
@@ -792,7 +877,6 @@
             });
         }
 
-        // ATUALIZAR SALDO
         async function updateBalance(isAfterMusicSend = false, showMessage = true) {
             if (!usuarioLogado || !senhaLogada) return alert('Faça login.');
 
@@ -835,7 +919,6 @@
             }
         }
 
-        // PIX / CRÉDITOS
         function initCreditControls() {
             let credits = 1;
             const MIN = 1, MAX = 100;
