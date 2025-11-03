@@ -93,22 +93,23 @@
             opacity: 0.7;
         }
 
-        /* BOTÃO MOSTRAR/OCULTAR DADOS */
+        /* BOTÃO MOSTRAR/OCULTAR DADOS - ROXO ESCURO E VISÍVEL */
         .show-data-btn {
-            background: rgba(255,255,255,0.15);
+            background: var(--nubank-dark);
             color: #fff;
             border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 0.95rem;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 12px;
+            margin-top: 14px;
             transition: 0.2s;
-            backdrop-filter: blur(4px);
+            box-shadow: 0 2px 8px rgba(95, 25, 155, 0.3);
         }
         .show-data-btn:hover {
-            background: rgba(255,255,255,0.25);
+            background: #4a148c;
+            transform: translateY(-1px);
         }
 
         /* CARTÃO ROXO ESTILO NUBANK */
@@ -267,7 +268,7 @@
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -466,6 +467,7 @@
                 <div class="user-id" id="user-id"></div>
             </div>
 
+            <!-- BOTÃO ROXO VISÍVEL -->
             <button class="show-data-btn" id="show-data-btn">Mostrar dados</button>
 
             <div id="sensitive-fields" style="display:none;flex-direction:column;align-items:center;margin-top:12px;width:100%;max-width:320px;">
@@ -479,7 +481,7 @@
         <div class="saldo-card">
             <div class="wallet-title">Carteira Musical</div>
             <div class="credit-line">
-                Crédito: <span id="saldo-valor">0</span> Money Bag
+                Crédito: <span id="saldo-valor">0</span> <span style="font-size:1.4rem;">Wallet</span>
             </div>
             <div class="id-ponto">ID do Ponto: <span id="id-ponto">0</span></div>
 
