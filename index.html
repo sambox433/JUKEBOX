@@ -946,9 +946,9 @@
                     const data = await resp.json();
 
                     modalMsg.style.display = 'block';
-                    if (data.status === 'sucesso') {
+                    if (!data.error) {
                         modalMsg.style.color = '#2e7d32';
-                        modalMsg.textContent = "Música enviada com sucesso!";
+                        modalMsg.textContent = data.message || "Música enviada com sucesso!";
                         
                         // Aguarda 3 segundos e atualiza o saldo
                         setTimeout(async () => {
@@ -1146,4 +1146,3 @@
     </script>
 </body>
 </html>
-
