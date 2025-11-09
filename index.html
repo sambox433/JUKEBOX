@@ -791,8 +791,12 @@
                 if (!response.ok || data.error) {
                     throw new Error(data.error || 'Erro ao carregar músicas');
                 }
-                console.log('Dados das músicas recebidos:', data.musicas); // Log para debug: abra o console do navegador (F12) para ver a estrutura
-                renderizarMusicas(data.musicas || [], data.cantor || nomeCantor);
+                // Mescla musicas (MP3) e videos (MP4) em uma única lista
+                const allItems = [
+                    ...(data.musicas || []),
+                    ...(data.videos || [])
+                ];
+                renderizarMusicas(allItems, data.cantor || nomeCantor);
             } catch (err) {
                 videosList.innerHTML = `<div style="color:#ff1744;font-weight:600;margin-top:24px;">${err.message}</div>`;
             }
@@ -823,7 +827,6 @@
             titleDiv.textContent = `Músicas de ${cantor}`;
             videosList.appendChild(titleDiv);
             musicas.forEach((item, index) => {
-                console.log(`Item ${index}:`, item); // Log individual para cada item, verifique se há campos como 'arquivo', 'url', 'tipo' etc.
                 const card = document.createElement('div');
                 card.className = 'video-card';
                 card.style.height = 'auto';
