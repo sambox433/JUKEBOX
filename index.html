@@ -791,6 +791,7 @@
                 if (!response.ok || data.error) {
                     throw new Error(data.error || 'Erro ao carregar músicas');
                 }
+                console.log('Dados das músicas recebidos:', data.musicas); // Log para debug: abra o console do navegador (F12) para ver a estrutura
                 renderizarMusicas(data.musicas || [], data.cantor || nomeCantor);
             } catch (err) {
                 videosList.innerHTML = `<div style="color:#ff1744;font-weight:600;margin-top:24px;">${err.message}</div>`;
@@ -821,7 +822,8 @@
             titleDiv.style.margin = '12px 0';
             titleDiv.textContent = `Músicas de ${cantor}`;
             videosList.appendChild(titleDiv);
-            musicas.forEach(item => {
+            musicas.forEach((item, index) => {
+                console.log(`Item ${index}:`, item); // Log individual para cada item, verifique se há campos como 'arquivo', 'url', 'tipo' etc.
                 const card = document.createElement('div');
                 card.className = 'video-card';
                 card.style.height = 'auto';
@@ -829,10 +831,19 @@
                     <div class="video-title">${item.nome || 'Sem nome'}</div>
                 `;
                 let type = 'mp3';
-                if (item.url && item.url.toLowerCase().endsWith('.mp4')) {
+                const lowerUrl = (item.url || '').toLowerCase();
+                const lowerNome = (item.nome || '').toLowerCase();
+                const lowerArquivo = (item.arquivo || '').toLowerCase(); // Assumindo possível campo 'arquivo'
+                if (lowerUrl.includes('.mp4') || lowerNome.includes('.mp4') || lowerArquivo.includes('.mp4')) {
                     type = 'mp4';
+                } else if (item.tipo && item.tipo.toLowerCase() === 'mp4') {
+                    type = 'mp4'; // Se houver campo 'tipo'
                 }
-                card.addEventListener('click', () => showCardModal(item.nome, JSON.stringify({titulo: item.nome, [type]: item.url})));
+                let urlToUse = item.url || item.arquivo || ''; // Flexível: usa 'url' ou 'arquivo' se presente
+                card.addEventListener('click', () => {
+                    const musicData = JSON.stringify({titulo: item.nome, [type]: urlToUse});
+                    showCardModal(item.nome, musicData);
+                });
                 videosList.appendChild(card);
             });
         }
