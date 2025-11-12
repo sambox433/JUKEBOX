@@ -544,7 +544,7 @@
     <div class="login-container" id="login-container">
         <div class="app-title">Jukebox Online</div>
         <!-- Seção de Login -->
-        <div class="form-section active" id="login-section">
+        <div class="form-section" id="login-section">
             <form class="login-form" id="login-form">
                 <div>
                     <label for="username">Usuário</label>
@@ -587,11 +587,11 @@
                 <button class="login-btn" type="submit">Cadastrar</button>
             </form>
             <div id="register-error" style="color: #ff1744; font-weight: 600; margin-top: 12px; display: none;"></div>
-            <div class="save-login-prompt">
+            <div class="save-login-prompt" style="display: none;">
                 <label>
                     <input type="checkbox" id="save-login" checked> Salvar login para próxima vez?
                 </label>
-                <button class="login-btn" id="save-and-login" style="margin-top: 12px; display: none;">Salvar e Entrar</button>
+                <button class="login-btn" id="save-and-login" style="margin-top: 12px;">Salvar e Entrar</button>
             </div>
             <div class="register-link" id="back-to-login" style="margin-top: 16px;">Voltar ao Login</div>
         </div>
@@ -835,21 +835,21 @@
             showLoginSection();
         });
         function showLoginSection() {
-            loginSection.classList.remove('hidden');
-            registerSection.classList.add('hidden');
-            recoverSection.classList.add('hidden');
+            loginSection.style.display = 'block';
+            registerSection.style.display = 'none';
+            recoverSection.style.display = 'none';
             saveLoginPrompt.style.display = 'none';
             saveAndLoginBtn.style.display = 'none';
         }
         function showRegisterSection() {
-            loginSection.classList.add('hidden');
-            registerSection.classList.remove('hidden');
-            recoverSection.classList.add('hidden');
+            loginSection.style.display = 'none';
+            registerSection.style.display = 'block';
+            recoverSection.style.display = 'none';
         }
         function showRecoverSection() {
-            loginSection.classList.add('hidden');
-            registerSection.classList.add('hidden');
-            recoverSection.classList.remove('hidden');
+            loginSection.style.display = 'none';
+            registerSection.style.display = 'none';
+            recoverSection.style.display = 'block';
         }
         // Mode selector handlers
         modeSelector.addEventListener('click', (e) => {
