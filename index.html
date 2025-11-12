@@ -360,6 +360,13 @@
             width: 100%;
             max-width: 360px;
         }
+        .register-form, .recover-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+            max-width: 360px;
+        }
         .login-form label {
             color: #fff;
             font-weight: 500;
@@ -415,12 +422,6 @@
         }
         .form-section.hidden {
             display: none;
-        }
-        .register-form, .recover-form {
-            display: none;
-        }
-        .register-form.active, .recover-form.active {
-            display: block;
         }
         .register-form label, .recover-form label {
             color: #fff;
@@ -1198,7 +1199,7 @@
                         if (data.message) {
                             showNotification(data.message, 'success');
                         }
-                       
+                      
                         // Aguarda 2 segundos e atualiza o saldo
                         setTimeout(async () => {
                             await updateBalance(true, false);
@@ -1253,7 +1254,7 @@
                 if (data.error) throw new Error(data.error);
                 // atualiza UI
                 mostrarMenuLateral(data);
-               
+              
                 // Mostra mensagem de sucesso (ajustada se for após música)
                 if (showMessage) {
                     const message = isAfterMusicSend
