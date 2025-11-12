@@ -7,23 +7,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&display=swap" rel="stylesheet">
     <style>
         :root {
-            --nubank-purple: #820ad1;
-            --nubank-dark: #5f199b;
-            --nubank-light: #f6f5fa;
-            --nubank-gradient: linear-gradient(135deg, #820ad1 0%, #5f199b 100%);
+            --orange: #FF6B35;
+            --orange-dark: #E55A30;
+            --orange-light: #FFF5F0;
+            --orange-gradient: linear-gradient(135deg, #FF6B35 0%, #E55A30 100%);
         }
         body {
             min-height: 100vh;
             margin: 0;
             font-family: 'Montserrat', Arial, sans-serif;
-            background: var(--nubank-gradient);
+            background: var(--orange-gradient);
             display: flex;
             align-items: stretch;
             justify-content: flex-start;
         }
         .sidebar {
             width: 260px;
-            background: var(--nubank-gradient);
+            background: var(--orange-gradient);
             box-shadow: 2px 0 16px #0002;
             display: flex;
             flex-direction: column;
@@ -37,9 +37,9 @@
         }
         .side-item {
             background: #fff;
-            color: var(--nubank-purple);
+            color: var(--orange);
             border-radius: 10px;
-            box-shadow: 0 2px 8px #820ad122;
+            box-shadow: 0 2px 8px #FF6B3511;
             padding: 12px 14px;
             margin-bottom: 14px;
             font-size: 1.03rem;
@@ -58,7 +58,7 @@
             align-items: center;
             justify-content: flex-start;
             padding: 48px 24px 24px 24px;
-            background: var(--nubank-light);
+            background: var(--orange-light);
             min-height: 100vh;
         }
         .user-info {
@@ -70,7 +70,7 @@
         .sensitive-toggle {
             background: transparent;
             border: none;
-            color: var(--nubank-dark);
+            color: var(--orange-dark);
             font-size: 1.05rem;
             cursor: pointer;
             margin-left: 8px;
@@ -85,7 +85,7 @@
             width: 68px;
             height: 68px;
             border-radius: 50%;
-            background: var(--nubank-gradient);
+            background: var(--orange-gradient);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -93,7 +93,7 @@
             color: #fff;
             font-weight: 700;
             margin-bottom: 12px;
-            box-shadow: 0 2px 8px #820ad144;
+            box-shadow: 0 2px 8px #FF6B3522;
         }
         .user-name {
             font-size: 1.3rem;
@@ -107,9 +107,9 @@
             opacity: 0.7;
         }
         .saldo-box {
-            background: var(--nubank-gradient);
+            background: var(--orange-gradient);
             border-radius: 16px;
-            box-shadow: 0 2px 8px #820ad144;
+            box-shadow: 0 2px 8px #FF6B3522;
             padding: 22px 18px 18px 18px;
             margin-bottom: 28px;
             display: flex;
@@ -139,7 +139,7 @@
             font-size: 2.1rem;
             font-weight: 700;
             letter-spacing: 1px;
-            text-shadow: 0 2px 8px #820ad144;
+            text-shadow: 0 2px 8px #FF6B3522;
         }
         .scan-btn {
             width: 100%;
@@ -148,27 +148,27 @@
             border: none;
             border-radius: 10px;
             background: #fff;
-            color: var(--nubank-purple);
+            color: var(--orange);
             font-size: 1.15rem;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 2px 8px #820ad122;
+            box-shadow: 0 2px 8px #FF6B3511;
             transition: background 0.2s, color 0.2s;
         }
         .scan-btn:hover {
-            background: var(--nubank-purple);
+            background: var(--orange);
             color: #fff;
         }
         .credit-btn {
             background: #fff;
-            color: var(--nubank-purple);
+            color: var(--orange);
             border-radius: 10px;
             width: 62px;
             height: 62px;
             font-size: 1.6rem;
             font-weight: 800;
             border: none;
-            box-shadow: 0 2px 8px #820ad122;
+            box-shadow: 0 2px 8px #FF6B3511;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -178,13 +178,13 @@
         .qr-result {
             width: 100%;
             margin-top: 18px;
-            background: #f6f5fa;
+            background: var(--orange-light);
             color: #333;
             border-radius: 10px;
             padding: 14px 10px;
             font-size: 1.08rem;
             font-weight: 600;
-            box-shadow: 0 2px 8px #820ad122;
+            box-shadow: 0 2px 8px #FF6B3511;
             display: none;
         }
         .search-section {
@@ -195,6 +195,34 @@
             flex-direction: column;
             align-items: center;
             gap: 12px;
+        }
+        .mode-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .mode-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .mode-btn.active {
+            background: #fff;
+            color: var(--orange);
+            box-shadow: 0 4px 8px #FF6B3522;
+        }
+        .mode-btn:not(.active) {
+            background: transparent;
+            color: #666;
+            border: 2px solid #e0e0e0;
+        }
+        .mode-btn:hover {
+            transform: translateY(-1px);
         }
         .search-bar {
             width: 100%;
@@ -207,19 +235,19 @@
             border-radius: 8px;
             border: 1.5px solid #e0e0e0;
             font-size: 1.08rem;
-            background: #f6f5fa;
+            background: var(--orange-light);
             color: #222;
             outline: none;
             transition: border 0.2s;
         }
         .search-bar input:focus {
-            border: 1.5px solid var(--nubank-purple);
+            border: 1.5px solid var(--orange);
         }
         .search-btn {
             padding: 12px 18px;
             border-radius: 8px;
             border: none;
-            background: var(--nubank-gradient);
+            background: var(--orange-gradient);
             color: #fff;
             font-size: 1.08rem;
             font-weight: 700;
@@ -227,7 +255,7 @@
             transition: background 0.2s;
         }
         .search-btn:hover {
-            background: #5f199b;
+            background: var(--orange-dark);
         }
         .videos-list {
             width: 100%;
@@ -242,7 +270,7 @@
         .video-card {
             background: #fff;
             border-radius: 16px;
-            box-shadow: 0 2px 12px #820ad122;
+            box-shadow: 0 2px 12px #FF6B3511;
             padding: 14px 14px 10px 14px;
             width: 100%;
             display: flex;
@@ -253,7 +281,7 @@
             position: relative;
         }
         .video-card:hover {
-            box-shadow: 0 4px 24px #820ad144;
+            box-shadow: 0 4px 24px #FF6B3522;
             transform: translateY(-4px) scale(1.03);
         }
         .video-thumb {
@@ -270,7 +298,7 @@
         .video-title {
             font-size: 1.08rem;
             font-weight: 700;
-            color: var(--nubank-dark);
+            color: var(--orange-dark);
             margin-bottom: 4px;
             text-align: center;
         }
@@ -310,7 +338,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: var(--nubank-gradient);
+            background: var(--orange-gradient);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -323,7 +351,7 @@
             font-weight: 700;
             color: #fff;
             margin-bottom: 32px;
-            text-shadow: 0 2px 8px #820ad144;
+            text-shadow: 0 2px 8px #FF6B3522;
         }
         .login-form {
             display: flex;
@@ -351,14 +379,14 @@
             border: none;
             border-radius: 8px;
             background: #fff;
-            color: var(--nubank-purple);
+            color: var(--orange);
             font-size: 1.15rem;
             font-weight: 700;
             cursor: pointer;
             transition: 0.2s;
         }
         .login-btn:hover {
-            background: var(--nubank-purple);
+            background: var(--orange);
             color: #fff;
         }
         #login-error {
@@ -366,6 +394,56 @@
             font-weight: 600;
             margin-top: 12px;
             display: none;
+        }
+        .register-link, .recover-link {
+            color: #fff;
+            text-decoration: underline;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 16px;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+        .register-link:hover, .recover-link:hover {
+            color: #fff;
+        }
+        .form-toggle {
+            display: none;
+        }
+        .form-section {
+            transition: opacity 0.3s ease;
+        }
+        .form-section.hidden {
+            display: none;
+        }
+        .register-form, .recover-form {
+            display: none;
+        }
+        .register-form.active, .recover-form.active {
+            display: block;
+        }
+        .register-form label, .recover-form label {
+            color: #fff;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+        .register-form input, .recover-form input {
+            padding: 12px 14px;
+            border-radius: 8px;
+            border: none;
+            font-size: 1.05rem;
+            background: #fff;
+            color: #222;
+            margin-bottom: 12px;
+        }
+        .save-login-prompt {
+            margin-top: 16px;
+            display: none;
+            text-align: center;
+            color: #fff;
+        }
+        .save-login-prompt input[type="checkbox"] {
+            margin-right: 8px;
         }
         @media (max-width: 900px) {
             .sidebar { width: 100vw; min-height: unset; border-radius: 0; box-shadow: none; padding: 24px 8px; flex-direction: row; }
@@ -384,6 +462,8 @@
             .scan-btn { padding: 10px; font-size: 1rem; }
             #pix-result img { max-width: 120px; }
             .video-thumb { height: 200px; }
+            .mode-selector { flex-direction: column; gap: 6px; }
+            .mode-btn { width: 100%; }
         }
         /* Spinner usado ao atualizar saldo */
         .spinner {
@@ -450,6 +530,10 @@
             <div id="qr-reader" style="width:100%;margin-top:10px;display:none;"></div>
         </div>
         <div class="search-section" id="search-section" style="display:none;">
+            <div class="mode-selector" id="mode-selector">
+                <button class="mode-btn active" data-mode="jukebox">Jukebox</button>
+                <button class="mode-btn" data-mode="karaoke">Karaoke</button>
+            </div>
             <div class="search-bar">
                 <input type="text" id="search-input" placeholder="Buscar cantores..." />
                 <button class="search-btn" id="search-btn">Buscar</button>
@@ -459,18 +543,72 @@
     </div>
     <div class="login-container" id="login-container">
         <div class="app-title">Jukebox Online</div>
-        <form class="login-form" id="login-form">
-            <div>
-                <label for="username">Usuário</label>
-                <input type="text" id="username" name="username" placeholder="Digite seu usuário" required>
+        <!-- Seção de Login -->
+        <div class="form-section active" id="login-section">
+            <form class="login-form" id="login-form">
+                <div>
+                    <label for="username">Usuário</label>
+                    <input type="text" id="username" name="username" placeholder="Digite seu usuário" required>
+                </div>
+                <div>
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" name="password" placeholder="Digite sua senha" required>
+                </div>
+                <button class="login-btn" type="submit">Entrar</button>
+            </form>
+            <div id="login-error">Usuário ou senha inválidos.</div>
+            <div class="recover-link" id="recover-link">Esqueci minha senha</div>
+            <div class="register-link" id="register-link">Cadastrar Novo Usuário</div>
+        </div>
+        <!-- Seção de Cadastro -->
+        <div class="form-section hidden" id="register-section">
+            <h3 style="color: #fff; text-align: center; margin-bottom: 20px;">Cadastro</h3>
+            <form class="register-form" id="register-form">
+                <div>
+                    <label for="reg-nome">Nome</label>
+                    <input type="text" id="reg-nome" required>
+                </div>
+                <div>
+                    <label for="reg-senha">Senha</label>
+                    <input type="password" id="reg-senha" required>
+                </div>
+                <div>
+                    <label for="reg-telefone">Telefone</label>
+                    <input type="tel" id="reg-telefone" required>
+                </div>
+                <div>
+                    <label for="reg-cpf">CPF</label>
+                    <input type="text" id="reg-cpf" required>
+                </div>
+                <div>
+                    <label for="reg-email">Email</label>
+                    <input type="email" id="reg-email" required>
+                </div>
+                <button class="login-btn" type="submit">Cadastrar</button>
+            </form>
+            <div id="register-error" style="color: #ff1744; font-weight: 600; margin-top: 12px; display: none;"></div>
+            <div class="save-login-prompt">
+                <label>
+                    <input type="checkbox" id="save-login" checked> Salvar login para próxima vez?
+                </label>
+                <button class="login-btn" id="save-and-login" style="margin-top: 12px; display: none;">Salvar e Entrar</button>
             </div>
-            <div>
-                <label for="password">Senha</label>
-                <input type="password" id="password" name="password" placeholder="Digite sua senha" required>
-            </div>
-            <button class="login-btn" type="submit">Entrar</button>
-        </form>
-        <div id="login-error">Usuário ou senha inválidos.</div>
+            <div class="register-link" id="back-to-login" style="margin-top: 16px;">Voltar ao Login</div>
+        </div>
+        <!-- Seção de Recuperação de Senha -->
+        <div class="form-section hidden" id="recover-section">
+            <h3 style="color: #fff; text-align: center; margin-bottom: 20px;">Recuperar Senha</h3>
+            <form class="recover-form" id="recover-form">
+                <div>
+                    <label for="recover-email">Email</label>
+                    <input type="email" id="recover-email" required>
+                </div>
+                <button class="login-btn" type="submit">Enviar Senha</button>
+            </form>
+            <div id="recover-error" style="color: #ff1744; font-weight: 600; margin-top: 12px; display: none;"></div>
+            <div id="recover-success" style="color: #4caf50; font-weight: 600; margin-top: 12px; display: none;">Senha enviada para seu email!</div>
+            <div class="register-link" id="back-to-login-recover">Voltar ao Login</div>
+        </div>
     </div>
     <script>
     // URL base do seu Web App para adicionar (sem query params)
@@ -485,6 +623,7 @@
         let totalPaginas = 1;
         let currentView = 'cantores';
         let currentCantor = null;
+        let currentMode = 'jukebox'; // Default mode
         const loginForm = document.getElementById('login-form');
     const loginContainer = document.getElementById('login-container');
     const sidebar = document.getElementById('sidebar'); // may be null if sidebar removed
@@ -502,6 +641,7 @@
         const searchInput = document.getElementById('search-input');
         const searchBtn = document.getElementById('search-btn');
         const videosList = document.getElementById('videos-list');
+        const modeSelector = document.getElementById('mode-selector');
     const decCreditBtn = document.getElementById('dec-credit');
     const incCreditBtn = document.getElementById('inc-credit');
     const selectedCreditsEl = document.getElementById('selected-credits');
@@ -514,6 +654,31 @@
     const fieldCpf = document.getElementById('field-cpf');
     const fieldEmail = document.getElementById('field-email');
     const fieldTelefone = document.getElementById('field-telefone');
+        // Elementos para telas de cadastro e recuperação
+        const loginSection = document.getElementById('login-section');
+        const registerSection = document.getElementById('register-section');
+        const recoverSection = document.getElementById('recover-section');
+        const registerForm = document.getElementById('register-form');
+        const recoverForm = document.getElementById('recover-form');
+        const registerError = document.getElementById('register-error');
+        const recoverError = document.getElementById('recover-error');
+        const recoverSuccess = document.getElementById('recover-success');
+        const saveLoginPrompt = document.querySelector('.save-login-prompt');
+        const saveLoginCheckbox = document.getElementById('save-login');
+        const saveAndLoginBtn = document.getElementById('save-and-login');
+        const registerLink = document.getElementById('register-link');
+        const recoverLink = document.getElementById('recover-link');
+        const backToLogin = document.getElementById('back-to-login');
+        const backToLoginRecover = document.getElementById('back-to-login-recover');
+        // Auto-fill login if saved
+        window.addEventListener('load', () => {
+            const savedUser = localStorage.getItem('savedUser');
+            const savedPass = localStorage.getItem('savedPass');
+            if (savedUser && savedPass) {
+                document.getElementById('username').value = savedUser;
+                document.getElementById('password').value = savedPass;
+            }
+        });
         // LOGIN
         loginForm.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -547,7 +712,9 @@
                 if (sidebar) sidebar.style.display = 'flex';
                 mainContent.style.display = 'flex';
                 searchSection.style.display = 'flex';
-                // inicia com listagem de cantores
+                // inicia com listagem de cantores no modo default
+                currentMode = 'jukebox';
+                updateModeUI();
                 buscarCantores(1, '');
                 // inicializa controles de PIX/creditos
                 initCreditControls();
@@ -565,11 +732,153 @@
                 loginError.style.display = 'block';
             }
         });
+        // Cadastro
+        registerForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            registerError.style.display = 'none';
+            const nome = document.getElementById('reg-nome').value.trim();
+            const senha = document.getElementById('reg-senha').value;
+            const telefone = document.getElementById('reg-telefone').value.trim();
+            const cpf = document.getElementById('reg-cpf').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            if (!nome || !senha || !telefone || !cpf || !email) {
+                registerError.textContent = 'Preencha todos os campos.';
+                registerError.style.display = 'block';
+                return;
+            }
+            if (senha.length < 4) {
+                registerError.textContent = 'Senha deve ter pelo menos 4 caracteres.';
+                registerError.style.display = 'block';
+                return;
+            }
+            try {
+                const url = `${ADD_API}?rota=/cadastrar_cliente&nome=${encodeURIComponent(nome)}&senha=${encodeURIComponent(senha)}&telefone=${encodeURIComponent(telefone)}&cpf=${encodeURIComponent(cpf)}&email=${encodeURIComponent(email)}`;
+                const response = await fetch(url);
+                if (response.status !== 200) {
+                    const errText = await response.text().catch(() => response.statusText || 'Erro no servidor');
+                    throw new Error(errText || 'Erro ao cadastrar');
+                }
+                const data = await response.json();
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                // Sucesso: mostra prompt para salvar login
+                saveLoginPrompt.style.display = 'block';
+                saveAndLoginBtn.style.display = 'block';
+                usuarioLogado = nome;
+                senhaLogada = senha;
+                // Preenche campos de login para auto-fill se salvar
+                document.getElementById('username').value = nome;
+                document.getElementById('password').value = senha;
+            } catch (err) {
+                registerError.textContent = err.message || 'Erro ao cadastrar.';
+                registerError.style.display = 'block';
+            }
+        });
+        saveAndLoginBtn.addEventListener('click', function() {
+            if (saveLoginCheckbox.checked) {
+                localStorage.setItem('savedUser', usuarioLogado);
+                localStorage.setItem('savedPass', senhaLogada);
+            }
+            // Simula login com dados cadastrados
+            mostrarMenuLateral({ nome: usuarioLogado, usuario_id: 'Novo', creditos: 0, telefone: document.getElementById('reg-telefone').value, cpf: document.getElementById('reg-cpf').value, email: document.getElementById('reg-email').value });
+            loginContainer.style.display = 'none';
+            mainContent.style.display = 'flex';
+            searchSection.style.display = 'flex';
+            currentMode = 'jukebox';
+            updateModeUI();
+            buscarCantores(1, '');
+            initCreditControls();
+        });
+        // Recuperação de Senha
+        recoverForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            recoverError.style.display = 'none';
+            recoverSuccess.style.display = 'none';
+            const email = document.getElementById('recover-email').value.trim();
+            if (!email) {
+                recoverError.textContent = 'Preencha o email.';
+                recoverError.style.display = 'block';
+                return;
+            }
+            try {
+                const url = `${ADD_API}?rota=/recuperar_senha/${encodeURIComponent(email)}`;
+                const response = await fetch(url);
+                if (response.status !== 200) {
+                    const errText = await response.text().catch(() => response.statusText || 'Erro no servidor');
+                    throw new Error(errText || 'Erro ao recuperar senha');
+                }
+                const data = await response.json();
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                recoverSuccess.style.display = 'block';
+                setTimeout(() => {
+                    showLoginSection();
+                }, 2000);
+            } catch (err) {
+                recoverError.textContent = err.message || 'Erro ao recuperar senha.';
+                recoverError.style.display = 'block';
+            }
+        });
+        // Handlers para alternar seções
+        registerLink.addEventListener('click', () => {
+            showRegisterSection();
+        });
+        recoverLink.addEventListener('click', () => {
+            showRecoverSection();
+        });
+        backToLogin.addEventListener('click', () => {
+            showLoginSection();
+        });
+        backToLoginRecover.addEventListener('click', () => {
+            showLoginSection();
+        });
+        function showLoginSection() {
+            loginSection.classList.remove('hidden');
+            registerSection.classList.add('hidden');
+            recoverSection.classList.add('hidden');
+            saveLoginPrompt.style.display = 'none';
+            saveAndLoginBtn.style.display = 'none';
+        }
+        function showRegisterSection() {
+            loginSection.classList.add('hidden');
+            registerSection.classList.remove('hidden');
+            recoverSection.classList.add('hidden');
+        }
+        function showRecoverSection() {
+            loginSection.classList.add('hidden');
+            registerSection.classList.add('hidden');
+            recoverSection.classList.remove('hidden');
+        }
+        // Mode selector handlers
+        modeSelector.addEventListener('click', (e) => {
+            if (e.target.classList.contains('mode-btn')) {
+                const newMode = e.target.dataset.mode;
+                if (newMode !== currentMode) {
+                    currentMode = newMode;
+                    updateModeUI();
+                    // Switch to cantores view in new mode
+                    currentView = 'cantores';
+                    currentBusca = '';
+                    searchInput.value = '';
+                    buscarCantores(1, '');
+                }
+            }
+        });
+        function updateModeUI() {
+            modeSelector.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.mode === currentMode);
+            });
+        }
+        function formatarCreditos(creditos) {
+            return Number(creditos || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
         function mostrarMenuLateral(data) {
             userAvatar.textContent = (data.nome && data.nome.length > 0) ? data.nome[0].toUpperCase() : '?';
             userName.textContent = data.nome || 'Não informado';
             userId.textContent = 'ID: ' + (data.usuario_id || 'Não informado');
-            saldoValor.textContent = (data.creditos !== undefined ? data.creditos : '0') + ' 💰';
+            saldoValor.textContent = formatarCreditos(data.creditos);
             if (sideMenu) {
                 sideMenu.innerHTML = '';
                 const campos = [
@@ -722,9 +1031,9 @@
             if (page < 1) page = 1;
             currentPage = page;
             currentBusca = busca;
-            videosList.innerHTML = '<div style="color:#820ad1;font-weight:600;margin-top:24px;">Buscando...</div>';
+            videosList.innerHTML = '<div style="color:var(--orange);font-weight:600;margin-top:24px;">Buscando...</div>';
             try {
-                let url = `${LIST_API}?rota=/listar_cantores&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&pagina=${page}`;
+                let url = `${LIST_API}?rota=/listar_cantores&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&pagina=${page}&tipo=${currentMode}`;
                 if (busca) url += `&busca=${encodeURIComponent(busca)}`;
                 const response = await fetch(url);
                 const data = await response.json();
@@ -783,20 +1092,17 @@
         async function carregarMusicas(id, nomeCantor) {
             currentView = 'musicas';
             currentCantor = { id, nome: nomeCantor };
-            videosList.innerHTML = '<div style="color:#820ad1;font-weight:600;margin-top:24px;">Carregando músicas...</div>';
+            videosList.innerHTML = '<div style="color:var(--orange);font-weight:600;margin-top:24px;">Carregando músicas...</div>';
             try {
-                const url = `${LIST_API}?rota=/listar_musicas&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&id=${encodeURIComponent(id)}`;
+                const url = `${LIST_API}?rota=/listar_musicas&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&id=${encodeURIComponent(id)}&tipo=${currentMode}`;
                 const response = await fetch(url);
                 const data = await response.json();
                 if (!response.ok || data.error) {
                     throw new Error(data.error || 'Erro ao carregar músicas');
                 }
-                // Mescla musicas (MP3) e videos (MP4) em uma única lista
-                const allItems = [
-                    ...(data.musicas || []),
-                    ...(data.videos || [])
-                ];
-                renderizarMusicas(allItems, data.cantor || nomeCantor);
+                // Combina musicas (mp3) e videos (mp4) para renderizar
+                const todasMusicas = [...(data.musicas || []), ...(data.videos || [])];
+                renderizarMusicas(todasMusicas, data.cantor || nomeCantor);
             } catch (err) {
                 videosList.innerHTML = `<div style="color:#ff1744;font-weight:600;margin-top:24px;">${err.message}</div>`;
             }
@@ -826,7 +1132,7 @@
             titleDiv.style.margin = '12px 0';
             titleDiv.textContent = `Músicas de ${cantor}`;
             videosList.appendChild(titleDiv);
-            musicas.forEach((item, index) => {
+            musicas.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'video-card';
                 card.style.height = 'auto';
@@ -834,19 +1140,10 @@
                     <div class="video-title">${item.nome || 'Sem nome'}</div>
                 `;
                 let type = 'mp3';
-                const lowerUrl = (item.url || '').toLowerCase();
-                const lowerNome = (item.nome || '').toLowerCase();
-                const lowerArquivo = (item.arquivo || '').toLowerCase(); // Assumindo possível campo 'arquivo'
-                if (lowerUrl.includes('.mp4') || lowerNome.includes('.mp4') || lowerArquivo.includes('.mp4')) {
+                if (item.url && item.url.toLowerCase().endsWith('.mp4')) {
                     type = 'mp4';
-                } else if (item.tipo && item.tipo.toLowerCase() === 'mp4') {
-                    type = 'mp4'; // Se houver campo 'tipo'
                 }
-                let urlToUse = item.url || item.arquivo || ''; // Flexível: usa 'url' ou 'arquivo' se presente
-                card.addEventListener('click', () => {
-                    const musicData = JSON.stringify({titulo: item.nome, [type]: urlToUse});
-                    showCardModal(item.nome, musicData);
-                });
+                card.addEventListener('click', () => showCardModal(item.nome, JSON.stringify({titulo: item.nome, [type]: item.url})));
                 videosList.appendChild(card);
             });
         }
@@ -901,7 +1198,7 @@
                         if (data.message) {
                             showNotification(data.message, 'success');
                         }
-                         
+                       
                         // Aguarda 2 segundos e atualiza o saldo
                         setTimeout(async () => {
                             await updateBalance(true, false);
@@ -956,12 +1253,12 @@
                 if (data.error) throw new Error(data.error);
                 // atualiza UI
                 mostrarMenuLateral(data);
-                 
+               
                 // Mostra mensagem de sucesso (ajustada se for após música)
                 if (showMessage) {
                     const message = isAfterMusicSend
-                        ? `Música enviada! Saldo atualizado: ${data.creditos !== undefined ? data.creditos : '0'} créditos`
-                        : `Saldo atualizado: ${data.creditos !== undefined ? data.creditos : '0'} créditos`;
+                        ? `Música enviada! Saldo atualizado: ${formatarCreditos(data.creditos)} créditos`
+                        : `Saldo atualizado: ${formatarCreditos(data.creditos)} créditos`;
                     pixResultEl.style.display = 'block';
                     pixResultEl.innerHTML = `<div style="color:#2e7d32;font-weight:700;">${message}</div>`;
                     setTimeout(() => pixResultEl.style.display = 'none', 2500);
@@ -1011,7 +1308,8 @@
                 }
                 pixResultEl.style.display = 'none';
                 const creditos = credits;
-                const oldBalance = parseInt(saldoValor.textContent) || 0;
+                const oldBalanceText = saldoValor.textContent.replace(/[,.]/g, '');
+                const oldBalance = parseInt(oldBalanceText) || 0;
                 try {
                     const url = `${ADD_API}?rota=/gerar_pix&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&creditos=${encodeURIComponent(creditos)}`;
                     const resp = await fetch(url);
@@ -1037,7 +1335,7 @@
                     if (data.qr_code) {
                         const qrImg = `https://api.qrserver.com/v1/create-qr-code/?size=360x360&data=${encodeURIComponent(data.qr_code)}`;
                         html += `<img src="${qrImg}" alt="QR" style="width:180px;height:180px;border-radius:8px;border:1px solid #eee;">`;
-                        html += `<pre id="pix-code-pre" style="margin:0;white-space:pre-wrap;word-break:break-all;background:#f6f5fa;padding:12px;border-radius:6px;max-width:92%;text-align:left;font-size:0.95rem;">${escapeHtml(data.qr_code)}</pre>`;
+                        html += `<pre id="pix-code-pre" style="margin:0;white-space:pre-wrap;word-break:break-all;background:var(--orange-light);padding:12px;border-radius:6px;max-width:92%;text-align:left;font-size:0.95rem;">${escapeHtml(data.qr_code)}</pre>`;
                         html += `<div style="font-size:0.95rem;color:#555;margin-top:8px;text-align:center;">Copie a chave PIX acima e pague com seu banco. Seus créditos serão atualizados após confirmação.</div>`;
                         html += `<div style="display:flex;gap:8px;margin-top:8px;">`;
                         html += `<button class=\"scan-btn\" id=\"copy-pix-code\">Copiar código PIX</button>`;
@@ -1062,7 +1360,8 @@
                     const pollInterval = setInterval(async () => {
                         try {
                             await updateBalance(false, false);
-                            const newBalance = parseInt(saldoValor.textContent) || 0;
+                            const newBalanceText = saldoValor.textContent.replace(/[,.]/g, '');
+                            const newBalance = parseInt(newBalanceText) || 0;
                             pollCount++;
                             if (newBalance > oldBalance) {
                                 clearInterval(pollInterval);
