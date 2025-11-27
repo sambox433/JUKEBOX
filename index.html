@@ -524,6 +524,13 @@
             </div>
             <button class="scan-btn" id="scan-btn">Escanear Ponto</button>
             <div class="qr-result" id="qr-result"></div>
+            <div id="point-info" style="display:none;margin-top:18px;width:100%;background:var(--orange-light);color:#333;border-radius:10px;padding:14px 10px;font-size:1.08rem;font-weight:600;box-shadow:0 2px 8px #FF6B3511;">
+                <div>Nome do Ponto: <span id="nome-ponto"></span></div>
+                <div>Total Músicas na Fila: <span id="total-musicas">0</span></div>
+                <div>Músicas na Fila:</div>
+                <ul id="musicas-list" style="list-style-type:disc;margin-left:20px;"></ul>
+                <button class="scan-btn" id="refresh-point" style="margin-top:12px;">Atualizar Lista do Ponto</button>
+            </div>
             <!-- Resultado do PIX -->
             <div id="pix-result" style="display:none;margin-top:12px;background:#fff;color:#000;padding:12px;border-radius:10px;">
                 <!-- preenchido dinamicamente -->
@@ -671,6 +678,11 @@
         const recoverLink = document.getElementById('recover-link');
         const backToLogin = document.getElementById('back-to-login');
         const backToLoginRecover = document.getElementById('back-to-login-recover');
+        const nomePontoEl = document.getElementById('nome-ponto');
+        const totalMusicasEl = document.getElementById('total-musicas');
+        const musicasListEl = document.getElementById('musicas-list');
+        const pointInfoEl = document.getElementById('point-info');
+        const refreshPointBtn = document.getElementById('refresh-point');
         // Auto-fill login if saved
         window.addEventListener('load', () => {
             const savedUser = localStorage.getItem('savedUser');
@@ -967,6 +979,7 @@
         }
         scanBtn.addEventListener('click', async function() {
             qrResult.style.display = 'none';
+            pointInfoEl.style.display = 'none';
             // if already running, stop
             if (document.getElementById('qr-overlay')) {
                 pararLeitorQR();
@@ -985,10 +998,11 @@
                 { fps: 10, qrbox: { width: 260, height: 160 } },
                 qrCodeMessage => {
                     qrResult.style.display = 'block';
-                    qrResult.textContent = 'Valor escaneado: ' + qrCodeMessage;
+                    qrResult.textContent = 'Ponto escaneado: ID ' + qrCodeMessage;
                     const idPontoEl = document.getElementById('id-ponto');
                     if (idPontoEl) idPontoEl.textContent = qrCodeMessage;
                     pararLeitorQR();
+                    fetchPointInfo(qrCodeMessage);
                 },
                 errorMessage => {
                     // ignore intermittent decode errors
@@ -1161,11 +1175,11 @@
             const title = escapeHtml(musicaNome || 'Sem título');
             const author = escapeHtml(currentCantor.nome || 'Desconhecido');
             const pontoId = document.getElementById('id-ponto')?.textContent.trim() || '0';
+            const pontoNome = document.getElementById('nome-ponto')?.textContent.trim() || '';
             overlay.innerHTML = `
                 <div class="modal-content">
-                    <div class="modal-row"><strong>Enviar música para o ponto</strong>
-                        <div>ID: <span style="font-weight:700;">${escapeHtml(pontoId)}</span></div>
-                    </div>
+                    <div class="modal-row"><strong>Enviar música para o ponto</strong></div>
+                    <div>Ponto: <strong>${escapeHtml(pontoNome)}</strong> (ID: ${escapeHtml(pontoId)})</div>
                     <div>Título: <strong>${title}</strong></div>
                     <div>Artista: ${author}</div>
                     <div class="modal-actions">
@@ -1199,7 +1213,7 @@
                         if (data.message) {
                             showNotification(data.message, 'success');
                         }
-                      
+                     
                         // Aguarda 2 segundos e atualiza o saldo
                         setTimeout(async () => {
                             await updateBalance(true, false);
@@ -1254,7 +1268,7 @@
                 if (data.error) throw new Error(data.error);
                 // atualiza UI
                 mostrarMenuLateral(data);
-              
+             
                 // Mostra mensagem de sucesso (ajustada se for após música)
                 if (showMessage) {
                     const message = isAfterMusicSend
@@ -1390,6 +1404,40 @@
             // primeira atualização do display
             updateDisplay();
         }
+        // Função para buscar info do ponto
+        async function fetchPointInfo(pontoId) {
+            try {
+                const url = `${ADD_API}?rota=/info_ponto&ponto_id=${encodeURIComponent(pontoId)}`;
+                const resp = await fetch(url);
+                if (resp.status !== 200) {
+                    throw new Error(await resp.text() || 'Erro ao buscar info do ponto');
+                }
+                const data = await resp.json();
+                if (data.status !== 'sucesso') {
+                    throw new Error(data.error || 'Erro na resposta');
+                }
+                nomePontoEl.textContent = data.nome_ponto || 'Não informado';
+                totalMusicasEl.textContent = data.total_musicas || 0;
+                musicasListEl.innerHTML = '';
+                (data.musicas || []).forEach(musica => {
+                    const li = document.createElement('li');
+                    li.textContent = typeof musica === 'string' ? musica : JSON.stringify(musica);
+                    musicasListEl.appendChild(li);
+                });
+                pointInfoEl.style.display = 'block';
+            } catch (err) {
+                qrResult.textContent = 'Erro ao carregar info do ponto: ' + err.message;
+            }
+        }
+        // Listener para atualizar lista do ponto
+        refreshPointBtn.addEventListener('click', () => {
+            const pontoId = document.getElementById('id-ponto').textContent.trim();
+            if (pontoId && pontoId !== '0') {
+                fetchPointInfo(pontoId);
+            } else {
+                alert('Escaneie um ponto primeiro.');
+            }
+        });
         // utilidades
         function escapeHtml(str) {
             if (!str) return '';
