@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -7,23 +8,26 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&display=swap" rel="stylesheet">
     <style>
         :root {
-            --orange: #FF6B35;
-            --orange-dark: #E55A30;
-            --orange-light: #FFF5F0;
-            --orange-gradient: linear-gradient(135deg, #FF6B35 0%, #E55A30 100%);
+            --green: #00C853;
+            --green-dark: #009624;
+            --green-light: #E8F5E9;
+            --blue: #2196F3;
+            --blue-dark: #1976D2;
+            --green-gradient: linear-gradient(135deg, #00C853 0%, #009624 100%);
+            --blue-gradient: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
         }
         body {
             min-height: 100vh;
             margin: 0;
             font-family: 'Montserrat', Arial, sans-serif;
-            background: var(--orange-gradient);
+            background: var(--green-gradient);
             display: flex;
             align-items: stretch;
             justify-content: flex-start;
         }
         .sidebar {
             width: 260px;
-            background: var(--orange-gradient);
+            background: var(--green-gradient);
             box-shadow: 2px 0 16px #0002;
             display: flex;
             flex-direction: column;
@@ -37,9 +41,9 @@
         }
         .side-item {
             background: #fff;
-            color: var(--orange);
+            color: var(--green);
             border-radius: 10px;
-            box-shadow: 0 2px 8px #FF6B3511;
+            box-shadow: 0 2px 8px #00C85311;
             padding: 12px 14px;
             margin-bottom: 14px;
             font-size: 1.03rem;
@@ -58,7 +62,7 @@
             align-items: center;
             justify-content: flex-start;
             padding: 48px 24px 24px 24px;
-            background: var(--orange-light);
+            background: var(--green-light);
             min-height: 100vh;
         }
         .user-info {
@@ -70,7 +74,7 @@
         .sensitive-toggle {
             background: transparent;
             border: none;
-            color: var(--orange-dark);
+            color: var(--green-dark);
             font-size: 1.05rem;
             cursor: pointer;
             margin-left: 8px;
@@ -85,7 +89,7 @@
             width: 68px;
             height: 68px;
             border-radius: 50%;
-            background: var(--orange-gradient);
+            background: var(--green-gradient);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -93,7 +97,7 @@
             color: #fff;
             font-weight: 700;
             margin-bottom: 12px;
-            box-shadow: 0 2px 8px #FF6B3522;
+            box-shadow: 0 2px 8px #00C85322;
         }
         .user-name {
             font-size: 1.3rem;
@@ -107,9 +111,9 @@
             opacity: 0.7;
         }
         .saldo-box {
-            background: var(--orange-gradient);
+            background: var(--green-gradient);
             border-radius: 16px;
-            box-shadow: 0 2px 8px #FF6B3522;
+            box-shadow: 0 2px 8px #00C85322;
             padding: 22px 18px 18px 18px;
             margin-bottom: 28px;
             display: flex;
@@ -135,11 +139,11 @@
             opacity: 0.9;
         }
         .saldo-valor {
-            color: #4caf50;
+            color: #fff; /* Mudado para branco como solicitado, mas pode ser ajustado */
             font-size: 2.1rem;
             font-weight: 700;
             letter-spacing: 1px;
-            text-shadow: 0 2px 8px #FF6B3522;
+            text-shadow: 0 2px 8px #00C85322;
         }
         .scan-btn {
             width: 100%;
@@ -148,27 +152,27 @@
             border: none;
             border-radius: 10px;
             background: #fff;
-            color: var(--orange);
+            color: var(--green);
             font-size: 1.15rem;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 2px 8px #FF6B3511;
+            box-shadow: 0 2px 8px #00C85311;
             transition: background 0.2s, color 0.2s;
         }
         .scan-btn:hover {
-            background: var(--orange);
+            background: var(--green);
             color: #fff;
         }
         .credit-btn {
             background: #fff;
-            color: var(--orange);
+            color: var(--green);
             border-radius: 10px;
             width: 62px;
             height: 62px;
             font-size: 1.6rem;
             font-weight: 800;
             border: none;
-            box-shadow: 0 2px 8px #FF6B3511;
+            box-shadow: 0 2px 8px #00C85311;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -178,13 +182,13 @@
         .qr-result {
             width: 100%;
             margin-top: 18px;
-            background: var(--orange-light);
+            background: var(--green-light);
             color: #333;
             border-radius: 10px;
             padding: 14px 10px;
             font-size: 1.08rem;
             font-weight: 600;
-            box-shadow: 0 2px 8px #FF6B3511;
+            box-shadow: 0 2px 8px #00C85311;
             display: none;
         }
         .search-section {
@@ -213,8 +217,8 @@
         }
         .mode-btn.active {
             background: #fff;
-            color: var(--orange);
-            box-shadow: 0 4px 8px #FF6B3522;
+            color: var(--green);
+            box-shadow: 0 4px 8px #00C85322;
         }
         .mode-btn:not(.active) {
             background: transparent;
@@ -235,19 +239,19 @@
             border-radius: 8px;
             border: 1.5px solid #e0e0e0;
             font-size: 1.08rem;
-            background: var(--orange-light);
+            background: var(--green-light);
             color: #222;
             outline: none;
             transition: border 0.2s;
         }
         .search-bar input:focus {
-            border: 1.5px solid var(--orange);
+            border: 1.5px solid var(--green);
         }
         .search-btn {
             padding: 12px 18px;
             border-radius: 8px;
             border: none;
-            background: var(--orange-gradient);
+            background: var(--green-gradient);
             color: #fff;
             font-size: 1.08rem;
             font-weight: 700;
@@ -255,7 +259,7 @@
             transition: background 0.2s;
         }
         .search-btn:hover {
-            background: var(--orange-dark);
+            background: var(--green-dark);
         }
         .videos-list {
             width: 100%;
@@ -270,7 +274,7 @@
         .video-card {
             background: #fff;
             border-radius: 16px;
-            box-shadow: 0 2px 12px #FF6B3511;
+            box-shadow: 0 2px 12px #00C85311;
             padding: 14px 14px 10px 14px;
             width: 100%;
             display: flex;
@@ -281,7 +285,7 @@
             position: relative;
         }
         .video-card:hover {
-            box-shadow: 0 4px 24px #FF6B3522;
+            box-shadow: 0 4px 24px #00C85322;
             transform: translateY(-4px) scale(1.03);
         }
         .video-thumb {
@@ -298,7 +302,7 @@
         .video-title {
             font-size: 1.08rem;
             font-weight: 700;
-            color: var(--orange-dark);
+            color: var(--green-dark);
             margin-bottom: 4px;
             text-align: center;
         }
@@ -338,7 +342,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: var(--orange-gradient);
+            background: var(--green-gradient);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -351,7 +355,7 @@
             font-weight: 700;
             color: #fff;
             margin-bottom: 32px;
-            text-shadow: 0 2px 8px #FF6B3522;
+            text-shadow: 0 2px 8px #00C85322;
         }
         .login-form {
             display: flex;
@@ -386,14 +390,14 @@
             border: none;
             border-radius: 8px;
             background: #fff;
-            color: var(--orange);
+            color: var(--green);
             font-size: 1.15rem;
             font-weight: 700;
             cursor: pointer;
             transition: 0.2s;
         }
         .login-btn:hover {
-            background: var(--orange);
+            background: var(--green);
             color: #fff;
         }
         #login-error {
@@ -524,7 +528,7 @@
             </div>
             <button class="scan-btn" id="scan-btn">Escanear Ponto</button>
             <div class="qr-result" id="qr-result"></div>
-            <div id="point-info" style="display:none;margin-top:18px;width:100%;background:var(--orange-light);color:#333;border-radius:10px;padding:14px 10px;font-size:1.08rem;font-weight:600;box-shadow:0 2px 8px #FF6B3511;">
+            <div id="point-info" style="display:none;margin-top:18px;width:100%;background:var(--green-light);color:#333;border-radius:10px;padding:14px 10px;font-size:1.08rem;font-weight:600;box-shadow:0 2px 8px #00C85311;">
                 <div>Nome do Ponto: <span id="nome-ponto"></span></div>
                 <div>Total Músicas na Fila: <span id="total-musicas">0</span></div>
                 <div>Músicas na Fila:</div>
@@ -595,6 +599,7 @@
                 <button class="login-btn" type="submit">Cadastrar</button>
             </form>
             <div id="register-error" style="color: #ff1744; font-weight: 600; margin-top: 12px; display: none;"></div>
+            <div id="register-success" style="color: #4caf50; font-weight: 600; margin-top: 12px; display: none;"></div>
             <div class="save-login-prompt" style="display: none;">
                 <label>
                     <input type="checkbox" id="save-login" checked> Salvar login para próxima vez?
@@ -669,6 +674,7 @@
         const registerForm = document.getElementById('register-form');
         const recoverForm = document.getElementById('recover-form');
         const registerError = document.getElementById('register-error');
+        const registerSuccess = document.getElementById('register-success');
         const recoverError = document.getElementById('recover-error');
         const recoverSuccess = document.getElementById('recover-success');
         const saveLoginPrompt = document.querySelector('.save-login-prompt');
@@ -749,6 +755,7 @@
         registerForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             registerError.style.display = 'none';
+            registerSuccess.style.display = 'none';
             const nome = document.getElementById('reg-nome').value.trim();
             const senha = document.getElementById('reg-senha').value;
             const telefone = document.getElementById('reg-telefone').value.trim();
@@ -775,14 +782,14 @@
                 if (data.error) {
                     throw new Error(data.error);
                 }
-                // Sucesso: mostra prompt para salvar login
-                saveLoginPrompt.style.display = 'block';
-                saveAndLoginBtn.style.display = 'block';
-                usuarioLogado = nome;
-                senhaLogada = senha;
-                // Preenche campos de login para auto-fill se salvar
-                document.getElementById('username').value = nome;
-                document.getElementById('password').value = senha;
+                // Sucesso: mostra mensagem de sucesso e volta à tela de login
+                registerSuccess.textContent = 'Cadastro criado com sucesso!';
+                registerSuccess.style.display = 'block';
+                document.getElementById('username').value = nome; // Preenche o usuário no login
+                setTimeout(() => {
+                    showLoginSection();
+                    registerSuccess.style.display = 'none';
+                }, 2000);
             } catch (err) {
                 registerError.textContent = err.message || 'Erro ao cadastrar.';
                 registerError.style.display = 'block';
@@ -1046,7 +1053,7 @@
             if (page < 1) page = 1;
             currentPage = page;
             currentBusca = busca;
-            videosList.innerHTML = '<div style="color:var(--orange);font-weight:600;margin-top:24px;">Buscando...</div>';
+            videosList.innerHTML = '<div style="color:var(--green);font-weight:600;margin-top:24px;">Buscando...</div>';
             try {
                 let url = `${LIST_API}?rota=/listar_cantores&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&pagina=${page}&tipo=${currentMode}`;
                 if (busca) url += `&busca=${encodeURIComponent(busca)}`;
@@ -1107,7 +1114,7 @@
         async function carregarMusicas(id, nomeCantor) {
             currentView = 'musicas';
             currentCantor = { id, nome: nomeCantor };
-            videosList.innerHTML = '<div style="color:var(--orange);font-weight:600;margin-top:24px;">Carregando músicas...</div>';
+            videosList.innerHTML = '<div style="color:var(--green);font-weight:600;margin-top:24px;">Carregando músicas...</div>';
             try {
                 const url = `${LIST_API}?rota=/listar_musicas&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&id=${encodeURIComponent(id)}&tipo=${currentMode}`;
                 const response = await fetch(url);
@@ -1213,7 +1220,7 @@
                         if (data.message) {
                             showNotification(data.message, 'success');
                         }
-                     
+                    
                         // Aguarda 2 segundos e atualiza o saldo
                         setTimeout(async () => {
                             await updateBalance(true, false);
@@ -1268,7 +1275,7 @@
                 if (data.error) throw new Error(data.error);
                 // atualiza UI
                 mostrarMenuLateral(data);
-             
+            
                 // Mostra mensagem de sucesso (ajustada se for após música)
                 if (showMessage) {
                     const message = isAfterMusicSend
@@ -1350,7 +1357,7 @@
                     if (data.qr_code) {
                         const qrImg = `https://api.qrserver.com/v1/create-qr-code/?size=360x360&data=${encodeURIComponent(data.qr_code)}`;
                         html += `<img src="${qrImg}" alt="QR" style="width:180px;height:180px;border-radius:8px;border:1px solid #eee;">`;
-                        html += `<pre id="pix-code-pre" style="margin:0;white-space:pre-wrap;word-break:break-all;background:var(--orange-light);padding:12px;border-radius:6px;max-width:92%;text-align:left;font-size:0.95rem;">${escapeHtml(data.qr_code)}</pre>`;
+                        html += `<pre id="pix-code-pre" style="margin:0;white-space:pre-wrap;word-break:break-all;background:var(--green-light);padding:12px;border-radius:6px;max-width:92%;text-align:left;font-size:0.95rem;">${escapeHtml(data.qr_code)}</pre>`;
                         html += `<div style="font-size:0.95rem;color:#555;margin-top:8px;text-align:center;">Copie a chave PIX acima e pague com seu banco. Seus créditos serão atualizados após confirmação.</div>`;
                         html += `<div style="display:flex;gap:8px;margin-top:8px;">`;
                         html += `<button class=\"scan-btn\" id=\"copy-pix-code\">Copiar código PIX</button>`;
@@ -1451,3 +1458,4 @@
     </script>
 </body>
 </html>
+```
