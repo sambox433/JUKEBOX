@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1076,8 +1077,9 @@
             cantores.forEach(cantor => {
                 const card = document.createElement('div');
                 card.className = 'video-card';
+                const capaUrl = cantor.capa ? encodeURI(cantor.capa) : 'https://via.placeholder.com/210x120?text=Sem+Imagem';
                 card.innerHTML = `
-                    <img class="video-thumb" src="${cantor.capa || 'https://via.placeholder.com/210x120?text=Sem+Imagem'}" alt="${cantor.nome}">
+                    <img class="video-thumb" src="${capaUrl}" alt="${cantor.nome}">
                     <div class="video-title">${cantor.nome || 'Sem nome'}</div>
                     <div class="video-id">ID: ${cantor.id || '-'}</div>
                 `;
@@ -1219,7 +1221,7 @@
                         if (data.message) {
                             showNotification(data.message, 'success');
                         }
-                    
+                   
                         // Aguarda 2 segundos e atualiza o saldo
                         setTimeout(async () => {
                             await updateBalance(true, false);
@@ -1274,7 +1276,7 @@
                 if (data.error) throw new Error(data.error);
                 // atualiza UI
                 mostrarMenuLateral(data);
-            
+           
                 // Mostra mensagem de sucesso (ajustada se for após música)
                 if (showMessage) {
                     const message = isAfterMusicSend
@@ -1457,4 +1459,4 @@
     </script>
 </body>
 </html>
-
+```
