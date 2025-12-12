@@ -1067,6 +1067,11 @@
                 videosList.innerHTML = `<div style="color:#ff1744;font-weight:600;margin-top:24px;">${err.message}</div>`;
             }
         }
+        function transformUrl(oldUrl) {
+            if (!oldUrl || !oldUrl.startsWith('http://167.114.85.72:8889')) return oldUrl;
+            const path = oldUrl.substring('http://167.114.85.72:8889'.length);
+            return 'https://netoke.shop' + encodeURI(path);
+        }
         function renderizarCantores(cantores) {
             if (cantores.length === 0) {
                 videosList.innerHTML = '<div style="color:#888;font-weight:600;margin-top:24px;">Nenhum cantor encontrado.</div>';
@@ -1076,9 +1081,8 @@
             cantores.forEach(cantor => {
                 const card = document.createElement('div');
                 card.className = 'video-card';
-                const capaUrl = cantor.capa ? encodeURI(cantor.capa) : 'https://via.placeholder.com/210x120?text=Sem+Imagem';
                 card.innerHTML = `
-                    <img class="video-thumb" src="${capaUrl}" alt="${cantor.nome}">
+                    <img class="video-thumb" src="${transformUrl(cantor.capa) || 'https://via.placeholder.com/210x120?text=Sem+Imagem'}" alt="${cantor.nome}">
                     <div class="video-title">${cantor.nome || 'Sem nome'}</div>
                     <div class="video-id">ID: ${cantor.id || '-'}</div>
                 `;
@@ -1458,4 +1462,3 @@
     </script>
 </body>
 </html>
-
