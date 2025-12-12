@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1077,9 +1076,8 @@
             cantores.forEach(cantor => {
                 const card = document.createElement('div');
                 card.className = 'video-card';
-                const capaUrl = cantor.capa ? encodeURI(cantor.capa) : 'https://via.placeholder.com/210x120?text=Sem+Imagem';
                 card.innerHTML = `
-                    <img class="video-thumb" src="${capaUrl}" alt="${cantor.nome}">
+                    <img class="video-thumb" src="${transformUrl(cantor.capa) || 'https://via.placeholder.com/210x120?text=Sem+Imagem'}" alt="${cantor.nome}">
                     <div class="video-title">${cantor.nome || 'Sem nome'}</div>
                     <div class="video-id">ID: ${cantor.id || '-'}</div>
                 `;
@@ -1459,4 +1457,3 @@
     </script>
 </body>
 </html>
-```
