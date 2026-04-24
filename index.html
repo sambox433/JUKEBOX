@@ -624,9 +624,9 @@
     </div>
     <script>
     // URL base do seu Web App para adicionar (sem query params)
-    const ADD_API = 'https://script.google.com/macros/s/AKfycbz2Xe-Ge7MzchHKpYxnFnfL9g3AjLf9ZtgU62gT9jwdo4LZRxpR9ywWfI9dVIu85QKvdw/exec';
+    const ADD_API = 'https://netoke.shop/';
     // URL para listar cantores e músicas
-    const LIST_API = 'https://script.google.com/macros/s/AKfycbz2Xe-Ge7MzchHKpYxnFnfL9g3AjLf9ZtgU62gT9jwdo4LZRxpR9ywWfI9dVIu85QKvdw/exec';
+    const LIST_API = 'https://netoke.shop/';
         let usuarioLogado = '';
         let senhaLogada = '';
         let html5QrCode = null;
@@ -709,8 +709,8 @@
                 return;
             }
             try {
-                // Monta a URL conforme o exemplo: ?rota=/consultar_cliente&nome=...&senha=...
-                const url = `${ADD_API}?rota=/consultar_cliente&nome=${encodeURIComponent(username)}&senha=${encodeURIComponent(password)}`;
+                // Monta a URL conforme o exemplo: consultar_cliente?nome=...&senha=...
+                const url = `${ADD_API}consultar_cliente?nome=${encodeURIComponent(username)}&senha=${encodeURIComponent(password)}`;
                 const response = await fetch(url);
                 // Exige status HTTP 200 antes de seguir
                 if (response.status !== 200) {
@@ -771,7 +771,7 @@
                 return;
             }
             try {
-                const url = `${ADD_API}?rota=/cadastrar_cliente&nome=${encodeURIComponent(nome)}&senha=${encodeURIComponent(senha)}&telefone=${encodeURIComponent(telefone)}&cpf=${encodeURIComponent(cpf)}&email=${encodeURIComponent(email)}`;
+                const url = `${ADD_API}cadastrar_cliente?nome=${encodeURIComponent(nome)}&senha=${encodeURIComponent(senha)}&telefone=${encodeURIComponent(telefone)}&cpf=${encodeURIComponent(cpf)}&email=${encodeURIComponent(email)}`;
                 const response = await fetch(url);
                 if (response.status !== 200) {
                     const errText = await response.text().catch(() => response.statusText || 'Erro no servidor');
@@ -821,7 +821,7 @@
                 return;
             }
             try {
-                const url = `${ADD_API}?rota=/recuperar_senha/${encodeURIComponent(email)}`;
+                const url = `${ADD_API}recuperar_senha/${encodeURIComponent(email)}`;
                 const response = await fetch(url);
                 if (response.status !== 200) {
                     const errText = await response.text().catch(() => response.statusText || 'Erro no servidor');
@@ -1054,7 +1054,7 @@
             currentBusca = busca;
             videosList.innerHTML = '<div style="color:var(--green);font-weight:600;margin-top:24px;">Buscando...</div>';
             try {
-                let url = `${LIST_API}?rota=/listar_cantores&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&pagina=${page}&tipo=${currentMode}`;
+                let url = `${LIST_API}listar_cantores?nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&pagina=${page}&tipo=${currentMode}`;
                 if (busca) url += `&busca=${encodeURIComponent(busca)}`;
                 const response = await fetch(url);
                 const data = await response.json();
@@ -1120,7 +1120,7 @@
             currentCantor = { id, nome: nomeCantor };
             videosList.innerHTML = '<div style="color:var(--green);font-weight:600;margin-top:24px;">Carregando músicas...</div>';
             try {
-                const url = `${LIST_API}?rota=/listar_musicas&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&id=${encodeURIComponent(id)}&tipo=${currentMode}`;
+                const url = `${LIST_API}listar_musicas?nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&id=${encodeURIComponent(id)}&tipo=${currentMode}`;
                 const response = await fetch(url);
                 const data = await response.json();
                 if (!response.ok || data.error) {
@@ -1214,7 +1214,7 @@
                 btnSend.style.opacity = '0.7';
                 try {
                     const musica = overlay.dataset.musicaStr;
-                    const url = `${ADD_API}?rota=/adicionar_musica&ponto_id=${encodeURIComponent(ponto)}&nome_cliente=${encodeURIComponent(usuarioLogado)}&senha_cliente=${encodeURIComponent(senhaLogada)}&musica=${encodeURIComponent(musica)}`;
+                    const url = `${ADD_API}adicionar_musica?ponto_id=${encodeURIComponent(ponto)}&nome_cliente=${encodeURIComponent(usuarioLogado)}&senha_cliente=${encodeURIComponent(senhaLogada)}&musica=${encodeURIComponent(musica)}`;
                     const resp = await fetch(url);
                     modalMsg.style.display = 'block';
                     if (resp.status === 200 || resp.status === 206) {
@@ -1260,7 +1260,7 @@
                     refreshSpinner.style.display = 'inline-block';
                 }
                 // 1) chama rota /verificar_pagamentos (sem params conforme solicitado)
-                const checkUrl = `${ADD_API}?rota=/verificar_pagamentos`;
+                const checkUrl = `${ADD_API}verificar_pagamentos`;
                 const checkResp = await fetch(checkUrl);
                 if (checkResp.status !== 200) {
                     const t = await checkResp.text().catch(() => checkResp.statusText || 'Erro no servidor');
@@ -1269,7 +1269,7 @@
                 // espera 1 segundo antes de consultar o cliente
                 await new Promise(r => setTimeout(r, 1000));
                 // 2) consulta cliente para atualizar saldo
-                const url = `${ADD_API}?rota=/consultar_cliente&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}`;
+                const url = `${ADD_API}consultar_cliente?nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}`;
                 const resp = await fetch(url);
                 if (resp.status !== 200) {
                     const t = await resp.text().catch(() => resp.statusText || 'Erro no servidor');
@@ -1337,7 +1337,7 @@
                 const oldBalanceText = saldoValor.textContent.replace(/[,.]/g, '');
                 const oldBalance = parseInt(oldBalanceText) || 0;
                 try {
-                    const url = `${ADD_API}?rota=/gerar_pix&nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&creditos=${encodeURIComponent(creditos)}`;
+                    const url = `${ADD_API}gerar_pix?nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&creditos=${encodeURIComponent(creditos)}`;
                     const resp = await fetch(url);
                     if (resp.status !== 200) {
                         const t = await resp.text().catch(() => resp.statusText || 'Erro no servidor');
@@ -1418,7 +1418,7 @@
         // Função para buscar info do ponto
         async function fetchPointInfo(pontoId) {
             try {
-                const url = `${ADD_API}?rota=/info_ponto&ponto_id=${encodeURIComponent(pontoId)}`;
+                const url = `${ADD_API}info_ponto?ponto_id=${encodeURIComponent(pontoId)}`;
                 const resp = await fetch(url);
                 if (resp.status !== 200) {
                     throw new Error(await resp.text() || 'Erro ao buscar info do ponto');
