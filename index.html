@@ -1068,9 +1068,8 @@
             }
         }
         function transformUrl(oldUrl) {
-            if (!oldUrl || !oldUrl.startsWith('http://167.114.85.72:8887')) return oldUrl;
-            const path = oldUrl.substring('http://167.114.85.72:8887'.length);
-            return 'https://netoke.shop' + encodeURI(path);
+            // A API já envia a URL pronta via netoke.shop, então só repassamos.
+            return oldUrl;
         }
         function renderizarCantores(cantores) {
             if (cantores.length === 0) {
