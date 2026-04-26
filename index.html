@@ -527,6 +527,13 @@
                 </div>
             </div>
             <button class="scan-btn" id="scan-btn">Escanear Ponto</button>
+            <div style="width:100%; margin-top:12px; display:flex; flex-direction:column; gap:8px;">
+                <div style="color:#fff; font-size:0.9rem; font-weight:500; text-align:center; opacity:0.8;">OU DIGITE O ID MANUALMENTE</div>
+                <div style="display:flex; gap:8px; width:100%;">
+                    <input type="text" id="manual-point-id" placeholder="ID do Ponto" style="flex:1; padding:10px; border-radius:8px; border:none; outline:none; font-size:1rem; font-weight:600; text-align:center;">
+                    <button class="scan-btn" id="verify-manual-btn" style="margin-top:0; width:auto; padding:0 18px;">Verificar</button>
+                </div>
+            </div>
             <div class="qr-result" id="qr-result"></div>
             <div id="point-info" style="display:none;margin-top:18px;width:100%;background:var(--green-light);color:#333;border-radius:10px;padding:14px 10px;font-size:1.08rem;font-weight:600;box-shadow:0 2px 8px #00C85311;">
                 <div>Nome do Ponto: <span id="nome-ponto"></span></div>
@@ -685,6 +692,8 @@
     const fieldCpf = document.getElementById('field-cpf');
     const fieldEmail = document.getElementById('field-email');
     const fieldTelefone = document.getElementById('field-telefone');
+    const manualPointInput = document.getElementById('manual-point-id');
+    const verifyManualBtn = document.getElementById('verify-manual-btn');
         // Elementos para telas de cadastro e recuperação
         const loginSection = document.getElementById('login-section');
         const registerSection = document.getElementById('register-section');
@@ -1107,6 +1116,23 @@
             // also hide legacy qrReader if present
             if (qrReader) qrReader.style.display = 'none';
         }
+
+        // VERIFICAÇÃO MANUAL DE PONTO
+        verifyManualBtn.addEventListener('click', () => {
+            const pontoId = manualPointInput.value.trim();
+            if (!pontoId) {
+                alert('Digite o ID do ponto.');
+                return;
+            }
+            qrResult.style.display = 'none';
+            pointInfoEl.style.display = 'none';
+            
+            const idPontoEl = document.getElementById('id-ponto');
+            if (idPontoEl) idPontoEl.textContent = pontoId;
+            
+            fetchPointInfo(pontoId);
+        });
+
         // BUSCA DE CANTORES
         searchBtn.addEventListener('click', () => {
             const termo = searchInput.value.trim();
