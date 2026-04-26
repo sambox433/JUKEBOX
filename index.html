@@ -497,6 +497,7 @@
             <div id="sensitive-area" style="display:flex;flex-direction:column;align-items:center;margin-top:8px;">
                 <div style="display:flex;align-items:center;gap:8px;">
                     <button id="toggle-sensitive" class="sensitive-toggle" title="Mostrar/Ocultar dados">👁️</button>
+                    <button class="logout-btn" onclick="sair()" style="background:var(--red); color:white; border:none; padding:4px 10px; border-radius:6px; font-weight:bold; cursor:pointer;">Sair</button>
                 </div>
                 <div id="sensitive-fields" style="display:flex;flex-direction:column;align-items:center;margin-top:6px;">
                     <div class="sensitive-field">CPF: <span class="sensitive-mask" id="field-cpf">•••••••••</span></div>
@@ -610,15 +611,33 @@
         <!-- Seção de Recuperação de Senha -->
         <div class="form-section hidden" id="recover-section">
             <h3 style="color: #fff; text-align: center; margin-bottom: 20px;">Recuperar Senha</h3>
-            <form class="recover-form" id="recover-form">
-                <div>
-                    <label for="recover-email">Email</label>
-                    <input type="email" id="recover-email" required>
-                </div>
-                <button class="login-btn" type="submit">Enviar Senha</button>
-            </form>
+            
+            <div id="recover-step-1">
+                <form class="recover-form" id="recover-form-1">
+                    <div>
+                        <label for="recover-email">Email Cadastrado</label>
+                        <input type="email" id="recover-email" required>
+                    </div>
+                    <button class="login-btn" type="submit" id="btn-recover-1">Enviar Código</button>
+                </form>
+            </div>
+
+            <div id="recover-step-2" style="display:none;">
+                <form class="recover-form" id="recover-form-2">
+                    <div>
+                        <label for="recover-codigo">Código de 6 dígitos</label>
+                        <input type="text" id="recover-codigo" required>
+                    </div>
+                    <div>
+                        <label for="recover-nova-senha">Nova Senha</label>
+                        <input type="password" id="recover-nova-senha" required>
+                    </div>
+                    <button class="login-btn" type="submit" id="btn-recover-2">Redefinir Senha</button>
+                </form>
+            </div>
+
             <div id="recover-error" style="color: #ff1744; font-weight: 600; margin-top: 12px; display: none;"></div>
-            <div id="recover-success" style="color: #4caf50; font-weight: 600; margin-top: 12px; display: none;">Senha enviada para seu email!</div>
+            <div id="recover-success" style="color: #4caf50; font-weight: 600; margin-top: 12px; display: none;"></div>
             <div class="register-link" id="back-to-login-recover">Voltar ao Login</div>
         </div>
     </div>
@@ -809,8 +828,19 @@
             buscarCantores(1, '');
             initCreditControls();
         });
-        // Recuperação de Senha
-        recoverForm.addEventListener('submit', async function(e) {
+        // Sair do sistema
+        function sair() {
+            localStorage.removeItem('savedUser');
+            localStorage.removeItem('savedPass');
+            usuarioLogado = '';
+            senhaLogada = '';
+            mainContent.style.display = 'none';
+            loginContainer.style.display = 'flex';
+            showLoginSection();
+        }
+
+        // Recuperação de Senha (Passo 1: Solicitar Código)
+        document.getElementById('recover-form-1').addEventListener('submit', async function(e) {
             e.preventDefault();
             recoverError.style.display = 'none';
             recoverSuccess.style.display = 'none';
@@ -820,24 +850,61 @@
                 recoverError.style.display = 'block';
                 return;
             }
+            document.getElementById('btn-recover-1').textContent = 'Enviando...';
             try {
-                const url = `${ADD_API}recuperar_senha/${encodeURIComponent(email)}`;
+                const url = `${ADD_API}solicitar_recuperacao?email=${encodeURIComponent(email)}`;
                 const response = await fetch(url);
-                if (response.status !== 200) {
-                    const errText = await response.text().catch(() => response.statusText || 'Erro no servidor');
-                    throw new Error(errText || 'Erro ao recuperar senha');
-                }
                 const data = await response.json();
-                if (data.error) {
-                    throw new Error(data.error);
+                if (response.status !== 200 || data.error) {
+                    throw new Error(data.detail || data.error || 'Erro ao enviar código');
                 }
+                recoverSuccess.textContent = 'Código enviado para seu e-mail!';
                 recoverSuccess.style.display = 'block';
+                
+                document.getElementById('recover-step-1').style.display = 'none';
+                document.getElementById('recover-step-2').style.display = 'block';
+            } catch (err) {
+                recoverError.textContent = err.message || 'Erro ao solicitar recuperação.';
+                recoverError.style.display = 'block';
+            } finally {
+                document.getElementById('btn-recover-1').textContent = 'Enviar Código';
+            }
+        });
+
+        // Recuperação de Senha (Passo 2: Redefinir Senha)
+        document.getElementById('recover-form-2').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            recoverError.style.display = 'none';
+            recoverSuccess.style.display = 'none';
+            const email = document.getElementById('recover-email').value.trim();
+            const codigo = document.getElementById('recover-codigo').value.trim();
+            const novaSenha = document.getElementById('recover-nova-senha').value;
+            
+            if (!codigo || !novaSenha) {
+                recoverError.textContent = 'Preencha o código e a nova senha.';
+                recoverError.style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('btn-recover-2').textContent = 'Redefinindo...';
+            try {
+                const url = `${ADD_API}redefinir_senha?email=${encodeURIComponent(email)}&codigo=${encodeURIComponent(codigo)}&nova_senha=${encodeURIComponent(novaSenha)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (response.status !== 200 || data.error) {
+                    throw new Error(data.detail || data.error || 'Erro ao redefinir senha');
+                }
+                recoverSuccess.textContent = 'Senha redefinida com sucesso! Você já pode fazer login.';
+                recoverSuccess.style.display = 'block';
+                
                 setTimeout(() => {
                     showLoginSection();
-                }, 2000);
+                }, 3000);
             } catch (err) {
-                recoverError.textContent = err.message || 'Erro ao recuperar senha.';
+                recoverError.textContent = err.message || 'Erro ao redefinir senha.';
                 recoverError.style.display = 'block';
+            } finally {
+                document.getElementById('btn-recover-2').textContent = 'Redefinir Senha';
             }
         });
         // Handlers para alternar seções
@@ -869,6 +936,10 @@
             loginSection.style.display = 'none';
             registerSection.style.display = 'none';
             recoverSection.style.display = 'block';
+            document.getElementById('recover-step-1').style.display = 'block';
+            document.getElementById('recover-step-2').style.display = 'none';
+            recoverError.style.display = 'none';
+            recoverSuccess.style.display = 'none';
         }
         // Mode selector handlers
         modeSelector.addEventListener('click', (e) => {
