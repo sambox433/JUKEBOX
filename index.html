@@ -293,7 +293,12 @@
             object-fit: cover;
             border-radius: 10px;
             margin-bottom: 10px;
-            background: #eee;
+            background: #111;
+            transition: opacity 0.4s ease-in-out;
+            opacity: 0;
+        }
+        .video-thumb.loaded {
+            opacity: 1;
         }
         /* evita que elementos como o código PIX estiquem a tela em mobile */
         #pix-result pre { max-width: 100%; overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
@@ -1160,6 +1165,11 @@
                 }
                 totalPaginas = data.total_paginas || 1;
                 renderizarCantores(data.cantores || []);
+                
+                // Pré-carrega a próxima página após renderizar a atual
+                if (currentPage < totalPaginas) {
+                    setTimeout(() => precarregarProximaPagina(currentPage + 1, busca), 1500);
+                }
             } catch (err) {
                 videosList.innerHTML = `<div style="color:#ff1744;font-weight:600;margin-top:24px;">${err.message}</div>`;
             }
@@ -1177,8 +1187,9 @@
             cantores.forEach(cantor => {
                 const card = document.createElement('div');
                 card.className = 'video-card';
+                const capaUrl = transformUrl(cantor.capa) || 'https://via.placeholder.com/210x120?text=Sem+Imagem';
                 card.innerHTML = `
-                    <img class="video-thumb" src="${transformUrl(cantor.capa) || 'https://via.placeholder.com/210x120?text=Sem+Imagem'}" alt="${cantor.nome}">
+                    <img class="video-thumb" src="${capaUrl}" alt="${cantor.nome}" loading="lazy" onload="this.classList.add('loaded')">
                     <div class="video-title">${cantor.nome || 'Sem nome'}</div>
                     <div class="video-id">ID: ${cantor.id || '-'}</div>
                 `;
@@ -1210,6 +1221,27 @@
             pagDiv.appendChild(btnPrev);
             pagDiv.appendChild(btnNext);
             videosList.appendChild(pagDiv);
+        }
+
+        // Função para pré-carregar a próxima página de forma assíncrona
+        async function precarregarProximaPagina(page, busca) {
+            try {
+                let url = `${LIST_API}listar_cantores?nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&pagina=${page}&tipo=${currentMode}`;
+                if (busca) url += `&busca=${encodeURIComponent(busca)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.cantores) {
+                    data.cantores.forEach(cantor => {
+                        if (cantor.capa) {
+                            const img = new Image();
+                            img.src = transformUrl(cantor.capa);
+                        }
+                    });
+                }
+            } catch (e) {
+                // Falha no pré-carregamento não deve afetar o usuário
+                console.log('Erro ao pré-carregar:', e);
+            }
         }
         async function carregarMusicas(id, nomeCantor) {
             currentView = 'musicas';
