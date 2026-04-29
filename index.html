@@ -655,14 +655,9 @@
         </div>
     </div>
     <script>
-    // URL base - detecta automaticamente o servidor atual
-    let BASE_URL = window.location.origin;
-    // Se for file:// ou localhost/inválido, usa netoke.shop como padrão
-    if (!BASE_URL || BASE_URL === 'null' || BASE_URL.startsWith('file://') || BASE_URL.startsWith('http://localhost')) {
-        BASE_URL = 'https://netoke.shop';
-    }
-    const ADD_API = BASE_URL + '/';
-    const LIST_API = BASE_URL + '/';
+    // URL base do servidor
+    const ADD_API = 'https://netoke.shop/';
+    const LIST_API = 'https://netoke.shop/';
     // APIs do YouTube
     const YOUTUBE_SEARCH_API = 'https://sbx.garraplay.shop/search?q=';
     const YOUTUBE_PLAY_API = 'https://sbx.garraplay.shop/play?url=';
