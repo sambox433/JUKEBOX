@@ -655,11 +655,11 @@
         </div>
     </div>
     <script>
-    // URL base do servidor local
+    // URL base - detecta automaticamente o servidor atual
     let BASE_URL = window.location.origin;
-    // Se for file:// (abrir direto), usa fallback para localhost
-    if (!BASE_URL || BASE_URL === 'null' || BASE_URL.startsWith('file://')) {
-        BASE_URL = 'http://localhost:8889';
+    // Se for file:// ou localhost/inválido, usa netoke.shop como padrão
+    if (!BASE_URL || BASE_URL === 'null' || BASE_URL.startsWith('file://') || BASE_URL.startsWith('http://localhost')) {
+        BASE_URL = 'https://netoke.shop';
     }
     const ADD_API = BASE_URL + '/';
     const LIST_API = BASE_URL + '/';
