@@ -1288,7 +1288,9 @@
                 btnSend.style.opacity = '0.7';
                 
                 try {
-                    const url = `${ADD_API}adicionar_musica_youtube?ponto_id=${encodeURIComponent(pontoId)}&nome_cliente=${encodeURIComponent(usuarioLogado)}&senha_cliente=${encodeURIComponent(senhaLogada)}&musica=${encodeURIComponent('YT:' + video.title)}&video_id=${encodeURIComponent(video.id)}`;
+                    // Usa a mesma rota de adicionar_musica (jukebox/karaoke)
+                    const musicaStr = `YT:${video.id}|${video.title}`;
+                    const url = `${ADD_API}adicionar_musica?ponto_id=${encodeURIComponent(pontoId)}&nome_cliente=${encodeURIComponent(usuarioLogado)}&senha_cliente=${encodeURIComponent(senhaLogada)}&musica=${encodeURIComponent(musicaStr)}`;
                     const resp = await fetch(url);
                     modalMsg.style.display = 'block';
                     if (resp.status === 200 || resp.status === 206) {
