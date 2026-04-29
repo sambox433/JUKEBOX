@@ -557,7 +557,6 @@
             <div class="mode-selector" id="mode-selector">
                 <button class="mode-btn active" data-mode="jukebox">Jukebox</button>
                 <button class="mode-btn" data-mode="karaoke">Karaoke</button>
-                <button class="mode-btn" data-mode="youtube">YouTube</button>
             </div>
             <div class="search-bar">
                 <input type="text" id="search-input" placeholder="Buscar cantores..." />
@@ -655,17 +654,10 @@
         </div>
     </div>
     <script>
-    // URL base do servidor local
-    let BASE_URL = window.location.origin;
-    // Se for file:// (abrir direto), usa fallback para localhost
-    if (!BASE_URL || BASE_URL === 'null' || BASE_URL.startsWith('file://')) {
-        BASE_URL = 'http://localhost:8889';
-    }
-    const ADD_API = BASE_URL + '/';
-    const LIST_API = BASE_URL + '/';
-    // APIs do YouTube
-    const YOUTUBE_SEARCH_API = 'https://sbx.garraplay.shop/search?q=';
-    const YOUTUBE_PLAY_API = 'https://sbx.garraplay.shop/play?url=';
+    // URL base do seu Web App para adicionar (sem query params)
+    const ADD_API = 'https://netoke.shop/';
+    // URL para listar cantores e músicas
+    const LIST_API = 'https://netoke.shop/';
         let usuarioLogado = '';
         let senhaLogada = '';
         let html5QrCode = null;
@@ -771,10 +763,10 @@
                 if (sidebar) sidebar.style.display = 'flex';
                 mainContent.style.display = 'flex';
                 searchSection.style.display = 'flex';
-                // inicia com listagem das mais tocadas no modo default
+                // inicia com listagem de cantores no modo default
                 currentMode = 'jukebox';
                 updateModeUI();
-                buscarMaisTocadas();
+                buscarCantores(1, '');
                 // inicializa controles de PIX/creditos
                 initCreditControls();
                 // inicializa toggle do olho (dados sensiveis)
@@ -970,14 +962,11 @@
                 if (newMode !== currentMode) {
                     currentMode = newMode;
                     updateModeUI();
+                    // Switch to cantores view in new mode
                     currentView = 'cantores';
                     currentBusca = '';
                     searchInput.value = '';
-                    if (newMode === 'youtube') {
-                        videosList.innerHTML = '<div style="color:var(--green);font-weight:600;margin-top:24px;">Digite um termo para buscar no YouTube</div>';
-                    } else {
-                        buscarMaisTocadas();
-                    }
+                    buscarCantores(1, '');
                 }
             }
         });
@@ -1152,12 +1141,8 @@
         // BUSCA DE CANTORES
         searchBtn.addEventListener('click', () => {
             const termo = searchInput.value.trim();
-            if (currentMode === 'youtube') {
-                buscarYouTube(termo);
-            } else {
-                currentView = 'cantores';
-                buscarCantores(1, termo);
-            }
+            currentView = 'cantores';
+            buscarCantores(1, termo);
         });
         searchInput.addEventListener('keydown', e => {
             if (e.key === 'Enter') {
@@ -1165,134 +1150,6 @@
                 searchBtn.click();
             }
         });
-
-        // Busca as mais tocadas ao iniciar
-        async function buscarMaisTocadas() {
-            videosList.innerHTML = '<div style="color:var(--green);font-weight:600;margin-top:24px;">Carregando mais tocadas...</div>';
-            try {
-                const url = `${LIST_API}listar_mais_tocadas?nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&tipo=${currentMode}&limite=50`;
-                const response = await fetch(url);
-                const data = await response.json();
-                if (!response.ok || data.error) {
-                    throw new Error(data.error || 'Erro ao buscar mais tocadas');
-                }
-                renderizarMaisTocadas(data.mais_tocadas || []);
-            } catch (err) {
-                console.error('Erro ao buscar mais tocadas:', err);
-                // Se der erro, mostra todos os cantores
-                buscarCantores(1, '');
-            }
-        }
-
-        function renderizarMaisTocadas(musicas) {
-            if (musicas.length === 0) {
-                // Se não houver histórico, mostra os cantores
-                buscarCantores(1, '');
-                return;
-            }
-            videosList.innerHTML = '<div style="color:var(--green);font-weight:600;margin-bottom:16px;">Mais Tocadas</div>';
-            musicas.forEach(musica => {
-                const card = document.createElement('div');
-                card.className = 'video-card';
-                card.innerHTML = `
-                    <div class="video-title" style="font-size:1rem;">${musica.titulo || 'Sem título'}</div>
-                    <div class="video-id">Tocada ${musica.vezes} vez(es)</div>
-                `;
-                // Ao clicar, mostra mensagem ou adiciona (por enquanto só exibe)
-                card.addEventListener('click', () => {
-                    alert(`Música: ${musica.titulo}\nTocada ${musica.vezes} vezes`);
-                });
-                videosList.appendChild(card);
-            });
-        }
-
-        // Busca no YouTube (tenta proxy primeiro, se falhar usa proxy público)
-        async function buscarYouTube(busca) {
-            if (!busca) {
-                videosList.innerHTML = '<div style="color:#ff1744;font-weight:600;margin-top:24px;">Digite um termo para buscar.</div>';
-                return;
-            }
-            videosList.innerHTML = '<div style="color:var(--green);font-weight:600;margin-top:24px;">Buscando no YouTube...</div>';
-            
-            // Função auxiliar para processar resultado
-            function processarResultado(data) {
-                if (data.results) {
-                    renderizarResultadosYouTube(data.results);
-                } else if (data.error) {
-                    throw new Error(data.error);
-                } else {
-                    throw new Error('Formato inválido');
-                }
-            }
-            
-            try {
-                // 1️⃣ Tenta via proxy do servidor local
-                const response1 = await fetch(`${ADD_API}buscar_youtube?q=${encodeURIComponent(busca)}`);
-                const data1 = await response1.json();
-                processarResultado(data1);
-                return;
-            } catch (err1) {
-                console.log('Proxy local falhou:', err1.message);
-            }
-            
-            try {
-                // 2️⃣ Tenta via proxy público CORS
-                const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(YOUTUBE_SEARCH_API + busca);
-                const response2 = await fetch(proxyUrl);
-                const data2 = await response2.json();
-                processarResultado(data2);
-                return;
-            } catch (err2) {
-                console.log('Proxy público falhou:', err2.message);
-            }
-            
-            videosList.innerHTML = '<div style="color:#ff1744;font-weight:600;margin-top:24px;">Erro ao buscar. Tente novamente.</div>';
-        }
-
-        function renderizarResultadosYouTube(videos) {
-            if (videos.length === 0) {
-                videosList.innerHTML = '<div style="color:#888;font-weight:600;margin-top:24px;">Nenhum vídeo encontrado.</div>';
-                return;
-            }
-            videosList.innerHTML = '';
-            videos.forEach(video => {
-                const card = document.createElement('div');
-                card.className = 'video-card';
-                card.innerHTML = `
-                    <img class="video-thumb" src="${video.thumbnail}" alt="${video.title}" loading="lazy" onload="this.classList.add('loaded')">
-                    <div class="video-title">${video.title || 'Sem título'}</div>
-                    <div class="video-id">Duração: ${video.duration || '-'}</div>
-                    <div class="video-id">ID: ${video.id}</div>
-                `;
-                card.addEventListener('click', () => adicionarMusicaYouTube(video));
-                videosList.appendChild(card);
-            });
-        }
-
-        async function adicionarMusicaYouTube(video) {
-            const pontoId = document.getElementById('id-ponto').textContent;
-            if (!pontoId || pontoId === '0') {
-                alert('Escaneie um ponto primeiro para adicionar música!');
-                return;
-            }
-            
-            const nomeMusica = `YT:${video.title}`;
-            const videoId = video.id;
-            
-            try {
-                const url = `${ADD_API}adicionar_musica_youtube?ponto_id=${pontoId}&nome_cliente=${encodeURIComponent(usuarioLogado)}&senha_cliente=${encodeURIComponent(senhaLogada)}&musica=${encodeURIComponent(nomeMusica)}&video_id=${encodeURIComponent(videoId)}`;
-                const response = await fetch(url);
-                const data = await response.json();
-                if (!response.ok || data.error) {
-                    throw new Error(data.error || 'Erro ao adicionar música');
-                }
-                alert(`Música "${video.title}" adicionada com sucesso!`);
-                fetchPointInfo(pontoId);
-            } catch (err) {
-                alert(err.message || 'Erro ao adicionar música');
-            }
-        }
-
         async function buscarCantores(page = 1, busca = '') {
             if (page < 1) page = 1;
             currentPage = page;
