@@ -1242,33 +1242,81 @@
                     <div class="video-id">Duração: ${video.duration || '-'}</div>
                     <div class="video-id">ID: ${video.id}</div>
                 `;
-                card.addEventListener('click', () => adicionarMusicaYouTube(video));
+                card.addEventListener('click', () => showYouTubeModal(video));
                 videosList.appendChild(card);
             });
         }
 
-        async function adicionarMusicaYouTube(video) {
-            const pontoId = document.getElementById('id-ponto').textContent;
-            if (!pontoId || pontoId === '0') {
-                alert('Escaneie um ponto primeiro para adicionar música!');
-                return;
-            }
+        function showYouTubeModal(video) {
+            const existingOverlay = document.querySelector('.fullscreen-modal');
+            if (existingOverlay) existingOverlay.remove();
+            const overlay = document.createElement('div');
+            overlay.className = 'fullscreen-modal';
+            const title = video.title || 'Sem título';
+            const pontoId = document.getElementById('id-ponto')?.textContent.trim() || '0';
+            const pontoNome = document.getElementById('nome-ponto')?.textContent.trim() || '';
             
-            const nomeMusica = `YT:${video.title}`;
-            const videoId = video.id;
+            overlay.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-row"><strong>Enviar música para o ponto</strong></div>
+                    <div>Ponto: <strong>${escapeHtml(pontoNome)}</strong> (ID: ${escapeHtml(pontoId)})</div>
+                    <div>Título: <strong>${escapeHtml(title)}</strong></div>
+                    <div class="video-id">YouTube ID: ${video.id}</div>
+                    <div class="modal-actions">
+                        <button class="scan-btn" id="modal-send">Enviar Música</button>
+                        <button class="scan-btn" id="modal-cancel">Cancelar</button>
+                    </div>
+                    <div id="modal-msg" style="margin-top:6px;font-weight:700;color:#2e7d32;display:none;"></div>
+                </div>
+            `;
+            overlay.dataset.videoId = video.id;
+            overlay.dataset.videoTitle = video.title;
+            document.body.appendChild(overlay);
             
-            try {
-                const url = `${ADD_API}adicionar_musica_youtube?ponto_id=${pontoId}&nome_cliente=${encodeURIComponent(usuarioLogado)}&senha_cliente=${encodeURIComponent(senhaLogada)}&musica=${encodeURIComponent(nomeMusica)}&video_id=${encodeURIComponent(videoId)}`;
-                const response = await fetch(url);
-                const data = await response.json();
-                if (!response.ok || data.error) {
-                    throw new Error(data.error || 'Erro ao adicionar música');
+            const btnCancel = overlay.querySelector('#modal-cancel');
+            const btnSend = overlay.querySelector('#modal-send');
+            const modalMsg = overlay.querySelector('#modal-msg');
+            
+            btnCancel.addEventListener('click', () => overlay.remove());
+            btnSend.addEventListener('click', async () => {
+                if (!pontoId || pontoId === '0') {
+                    alert('Escaneie o ponto antes de enviar.');
+                    return;
                 }
-                alert(`Música "${video.title}" adicionada com sucesso!`);
-                fetchPointInfo(pontoId);
-            } catch (err) {
-                alert(err.message || 'Erro ao adicionar música');
-            }
+                btnSend.disabled = true;
+                btnCancel.disabled = true;
+                btnSend.style.opacity = '0.7';
+                
+                try {
+                    const url = `${ADD_API}adicionar_musica_youtube?ponto_id=${encodeURIComponent(pontoId)}&nome_cliente=${encodeURIComponent(usuarioLogado)}&senha_cliente=${encodeURIComponent(senhaLogada)}&musica=${encodeURIComponent('YT:' + video.title)}&video_id=${encodeURIComponent(video.id)}`;
+                    const resp = await fetch(url);
+                    modalMsg.style.display = 'block';
+                    if (resp.status === 200 || resp.status === 206) {
+                        const data = await resp.json();
+                        modalMsg.style.color = '#2e7d32';
+                        modalMsg.textContent = 'MENSAGEM ENVIADA';
+                        showNotification('Música adicionada!', 'success');
+                        fetchPointInfo(pontoId);
+                        setTimeout(async () => {
+                            await updateBalance(true, false);
+                            overlay.remove();
+                        }, 2000);
+                    } else {
+                        const data = await resp.json().catch(() => ({}));
+                        modalMsg.style.color = '#ff1744';
+                        modalMsg.textContent = data.error || "Erro ao enviar música";
+                        setTimeout(() => overlay.remove(), 1500);
+                    }
+                } catch (err) {
+                    modalMsg.style.display = 'block';
+                    modalMsg.style.color = '#ff1744';
+                    modalMsg.textContent = err.message || "Erro ao enviar música";
+                    btnSend.disabled = false;
+                    btnCancel.disabled = false;
+                    btnSend.style.opacity = '1';
+                    setTimeout(() => overlay.remove(), 1500);
+                }
+            });
         }
 
         async function buscarCantores(page = 1, busca = '') {
