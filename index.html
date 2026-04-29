@@ -557,6 +557,7 @@
             <div class="mode-selector" id="mode-selector">
                 <button class="mode-btn active" data-mode="jukebox">Jukebox</button>
                 <button class="mode-btn" data-mode="karaoke">Karaoke</button>
+                <button class="mode-btn" data-mode="youtube">YouTube</button>
             </div>
             <div class="search-bar">
                 <input type="text" id="search-input" placeholder="Buscar cantores..." />
@@ -658,6 +659,9 @@
     const ADD_API = 'https://netoke.shop/';
     // URL para listar cantores e músicas
     const LIST_API = 'https://netoke.shop/';
+    // APIs do YouTube
+    const YOUTUBE_SEARCH_API = 'https://sbx.garraplay.shop/search?q=';
+    const YOUTUBE_PLAY_API = 'https://sbx.garraplay.shop/play?url=';
         let usuarioLogado = '';
         let senhaLogada = '';
         let html5QrCode = null;
@@ -1141,8 +1145,12 @@
         // BUSCA DE CANTORES
         searchBtn.addEventListener('click', () => {
             const termo = searchInput.value.trim();
-            currentView = 'cantores';
-            buscarCantores(1, termo);
+            if (currentMode === 'youtube') {
+                buscarYouTube(termo);
+            } else {
+                currentView = 'cantores';
+                buscarCantores(1, termo);
+            }
         });
         searchInput.addEventListener('keydown', e => {
             if (e.key === 'Enter') {
@@ -1150,6 +1158,70 @@
                 searchBtn.click();
             }
         });
+
+        // Busca no YouTube
+        async function buscarYouTube(busca) {
+            if (!busca) {
+                videosList.innerHTML = '<div style="color:#ff1744;font-weight:600;margin-top:24px;">Digite um termo para buscar.</div>';
+                return;
+            }
+            videosList.innerHTML = '<div style="color:var(--green);font-weight:600;margin-top:24px;">Buscando no YouTube...</div>';
+            try {
+                const response = await fetch(YOUTUBE_SEARCH_API + encodeURIComponent(busca));
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || 'Erro ao buscar no YouTube');
+                }
+                renderizarResultadosYouTube(data.results || []);
+            } catch (err) {
+                videosList.innerHTML = `<div style="color:#ff1744;font-weight:600;margin-top:24px;">${err.message}</div>`;
+            }
+        }
+
+        function renderizarResultadosYouTube(videos) {
+            if (videos.length === 0) {
+                videosList.innerHTML = '<div style="color:#888;font-weight:600;margin-top:24px;">Nenhum vídeo encontrado.</div>';
+                return;
+            }
+            videosList.innerHTML = '';
+            videos.forEach(video => {
+                const card = document.createElement('div');
+                card.className = 'video-card';
+                card.innerHTML = `
+                    <img class="video-thumb" src="${video.thumbnail}" alt="${video.title}" loading="lazy" onload="this.classList.add('loaded')">
+                    <div class="video-title">${video.title || 'Sem título'}</div>
+                    <div class="video-id">Duração: ${video.duration || '-'}</div>
+                    <div class="video-id">ID: ${video.id}</div>
+                `;
+                card.addEventListener('click', () => adicionarMusicaYouTube(video));
+                videosList.appendChild(card);
+            });
+        }
+
+        async function adicionarMusicaYouTube(video) {
+            const pontoId = document.getElementById('id-ponto').textContent;
+            if (!pontoId || pontoId === '0') {
+                alert('Escaneie um ponto primeiro para adicionar música!');
+                return;
+            }
+            
+            const nomeMusica = `YT:${video.title}`;
+            const videoId = video.id;
+            
+            try {
+                const url = `${ADD_API}adicionar_musica_youtube?ponto_id=${pontoId}&nome_cliente=${encodeURIComponent(usuarioLogado)}&senha_cliente=${encodeURIComponent(senhaLogada)}&musica=${encodeURIComponent(nomeMusica)}&video_id=${encodeURIComponent(videoId)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (!response.ok || data.error) {
+                    throw new Error(data.error || 'Erro ao adicionar música');
+                }
+                alert(`Música "${video.title}" adicionada com sucesso!`);
+                fetchPointInfo(pontoId);
+            } catch (err) {
+                alert(err.message || 'Erro ao adicionar música');
+            }
+        }
+
         async function buscarCantores(page = 1, busca = '') {
             if (page < 1) page = 1;
             currentPage = page;
