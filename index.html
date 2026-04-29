@@ -655,10 +655,10 @@
         </div>
     </div>
     <script>
-    // URL base do seu Web App para adicionar (sem query params)
-    const ADD_API = 'https://netoke.shop/';
-    // URL para listar cantores e músicas
-    const LIST_API = 'https://netoke.shop/';
+    // URL base do servidor local
+    const BASE_URL = window.location.origin;
+    const ADD_API = BASE_URL + '/';
+    const LIST_API = BASE_URL + '/';
     // APIs do YouTube
     const YOUTUBE_SEARCH_API = 'https://sbx.garraplay.shop/search?q=';
     const YOUTUBE_PLAY_API = 'https://sbx.garraplay.shop/play?url=';
@@ -767,10 +767,10 @@
                 if (sidebar) sidebar.style.display = 'flex';
                 mainContent.style.display = 'flex';
                 searchSection.style.display = 'flex';
-                // inicia com listagem de cantores no modo default
+                // inicia com listagem das mais tocadas no modo default
                 currentMode = 'jukebox';
                 updateModeUI();
-                buscarCantores(1, '');
+                buscarMaisTocadas();
                 // inicializa controles de PIX/creditos
                 initCreditControls();
                 // inicializa toggle do olho (dados sensiveis)
@@ -966,11 +966,14 @@
                 if (newMode !== currentMode) {
                     currentMode = newMode;
                     updateModeUI();
-                    // Switch to cantores view in new mode
                     currentView = 'cantores';
                     currentBusca = '';
                     searchInput.value = '';
-                    buscarCantores(1, '');
+                    if (newMode === 'youtube') {
+                        videosList.innerHTML = '<div style="color:var(--green);font-weight:600;margin-top:24px;">Digite um termo para buscar no YouTube</div>';
+                    } else {
+                        buscarMaisTocadas();
+                    }
                 }
             }
         });
@@ -1158,6 +1161,46 @@
                 searchBtn.click();
             }
         });
+
+        // Busca as mais tocadas ao iniciar
+        async function buscarMaisTocadas() {
+            videosList.innerHTML = '<div style="color:var(--green);font-weight:600;margin-top:24px;">Carregando mais tocadas...</div>';
+            try {
+                const url = `${LIST_API}listar_mais_tocadas?nome=${encodeURIComponent(usuarioLogado)}&senha=${encodeURIComponent(senhaLogada)}&tipo=${currentMode}&limite=50`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (!response.ok || data.error) {
+                    throw new Error(data.error || 'Erro ao buscar mais tocadas');
+                }
+                renderizarMaisTocadas(data.mais_tocadas || []);
+            } catch (err) {
+                console.error('Erro ao buscar mais tocadas:', err);
+                // Se der erro, mostra todos os cantores
+                buscarCantores(1, '');
+            }
+        }
+
+        function renderizarMaisTocadas(musicas) {
+            if (musicas.length === 0) {
+                // Se não houver histórico, mostra os cantores
+                buscarCantores(1, '');
+                return;
+            }
+            videosList.innerHTML = '<div style="color:var(--green);font-weight:600;margin-bottom:16px;">Mais Tocadas</div>';
+            musicas.forEach(musica => {
+                const card = document.createElement('div');
+                card.className = 'video-card';
+                card.innerHTML = `
+                    <div class="video-title" style="font-size:1rem;">${musica.titulo || 'Sem título'}</div>
+                    <div class="video-id">Tocada ${musica.vezes} vez(es)</div>
+                `;
+                // Ao clicar, mostra mensagem ou adiciona (por enquanto só exibe)
+                card.addEventListener('click', () => {
+                    alert(`Música: ${musica.titulo}\nTocada ${musica.vezes} vezes`);
+                });
+                videosList.appendChild(card);
+            });
+        }
 
         // Busca no YouTube
         async function buscarYouTube(busca) {
